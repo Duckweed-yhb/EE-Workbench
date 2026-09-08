@@ -1,0 +1,8 @@
+{
+	"About": "About",
+	"EE Workbench v${1}": "EE Workbench v${1}",
+	"打开工作台失败：${1}": "Failed to open workbench: ${1}",
+	"已记入待办，未完成 ${1} 项": "Added to todo, ${1} open item(s)",
+	"请先打开一个原理图文档": "Please open a schematic document first",
+	"请先打开一个 PCB 文档": "Please open a PCB document first"
+}

@@ -1,0 +1,15 @@
+/.vscode/*
+!/.vscode/extensions.json
+!/.vscode/settings.json
+/coverage/
+/dist/
+/node_modules/
+/.eslintcache
+debug.log
+
+# build artifacts & personal files
+build/dist/
+*.eext
+ee-workbench-source.zip
+how-to-start.md
+logo.png

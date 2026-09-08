@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+	<title>EE Workbench</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<style>
+		:root {
+			--bg: #12161c;
+			--panel: #1a2028;
+			--panel-2: #212a35;
+			--border: #2c3542;
+			--text: #e8edf3;
+			--dim: #8a94a3;
+			--accent: #ff6b4a;
+			--green: #35c26b;
+			--blue: #4a9eff;
+			--amber: #f0a63e;
+			--red: #e5534b;
+			--radius: 10px;
+			--mono: "SF Mono", "JetBrains Mono", Consolas, "Courier New", monospace;
+		}
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		html, body { height: 100%; }
+		body {
+			background: var(--bg);
+			color: var(--text);
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+			font-size: 13px;
+			display: flex;
+			flex-direction: column;
+			overflow: hidden;
+			user-select: none;
+		}
+		button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+		input, select, textarea { font-family: inherit; }
+
+		/* ---------- 顶栏 ---------- */
+		.header {
+			display: flex; align-items: center; gap: 8px;
+			padding: 10px 14px;
+			background: var(--panel);
+			border-bottom: 1px solid var(--border);
+			flex-shrink: 0;
+		}
+		.header .logo {
+			width: 22px; height: 22px; border-radius: 6px;
+			background: linear-gradient(135deg, var(--accent), #ff9d5c);
+			display: flex; align-items: center; justify-content: center;
+			color: #fff; font-weight: 800; font-size: 12px;
+			font-family: var(--mono);
+		}
+		.header .title { font-weight: 600; font-size: 13.5px; letter-spacing: .2px; flex: 1; }
+		.header .badge {
+			font-size: 10px; color: var(--dim);
+			border: 1px solid var(--border); border-radius: 20px; padding: 2px 8px;
+		}
+		.header .close {
+			width: 26px; height: 26px; border-radius: 6px;
+			display: flex; align-items: center; justify-content: center;
+			color: var(--dim); font-size: 15px;
+		}
+		.header .close:hover { background: var(--panel-2); color: var(--text); }
+
+		/* ---------- 预览模式横幅 ---------- */
+		.preview-banner {
+			display: none;
+			background: #2b2416; color: var(--amber);
+			padding: 6px 14px; font-size: 11.5px;
+			border-bottom: 1px solid #4a3d1f;
+			flex-shrink: 0;
+		}
+
+		/* ---------- 标签页 ---------- */
+		.tabs {
+			display: flex; gap: 4px; padding: 8px 10px 0;
+			background: var(--panel); border-bottom: 1px solid var(--border);
+			flex-shrink: 0;
+		}
+		.tab {
+			flex: 1; padding: 8px 4px; text-align: center;
+			color: var(--dim); font-size: 12.5px; font-weight: 500;
+			border-radius: 8px 8px 0 0; border-bottom: 2px solid transparent;
+			transition: color .15s;
+		}
+		.tab:hover { color: var(--text); background: var(--panel-2); }
+		.tab.active { color: var(--text); border-bottom-color: var(--accent); }
+		.tab .cnt {
+			display: inline-block; margin-left: 5px; min-width: 17px; padding: 1px 5px;
+			border-radius: 10px; background: var(--panel-2); font-size: 10.5px; color: var(--dim);
+		}
+		.tab.active .cnt { color: var(--accent); }
+
+		/* ---------- 视图容器 ---------- */
+		.view { display: none; flex: 1; overflow-y: auto; padding: 12px; }
+		.view.active { display: block; }
+		.view::-webkit-scrollbar { width: 8px; }
+		.view::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+		.card {
+			background: var(--panel); border: 1px solid var(--border);
+			border-radius: var(--radius); padding: 14px;
+			margin-bottom: 12px;
+		}
+		.btn {
+			padding: 7px 14px; border-radius: 8px;
+			background: var(--panel-2); color: var(--text);
+			font-size: 12.5px; font-weight: 500;
+			border: 1px solid var(--border);
+			transition: filter .12s, background .12s;
+		}
+		.btn:hover { filter: brightness(1.15); }
+		.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+		.btn.green { background: var(--green); border-color: var(--green); color: #10241a; }
+		.btn.small { padding: 4px 9px; font-size: 11.5px; border-radius: 6px; }
+		.btn:disabled { opacity: .45; cursor: not-allowed; }
+		.input, .select {
+			width: 100%; padding: 7px 10px;
+			background: var(--bg); color: var(--text);
+			border: 1px solid var(--border); border-radius: 8px;
+			font-size: 12.5px; outline: none;
+		}
+		.input:focus, .select:focus { border-color: var(--accent); }
+		.input::placeholder { color: #5b6574; }
+		.hint { color: var(--dim); font-size: 11px; }
+		.row { display: flex; gap: 8px; align-items: center; }
+		.grow { flex: 1; }
+
+		/* ---------- 番茄钟 ---------- */
+		.mode-chips { display: flex; gap: 6px; margin-bottom: 14px; }
+		.chip {
+			flex: 1; padding: 7px 0; text-align: center;
+			border-radius: 8px; border: 1px solid var(--border);
+			color: var(--dim); font-size: 12px; font-weight: 500;
+			background: var(--panel);
+		}
+		.chip:hover { color: var(--text); }
+		.chip.active { color: #fff; border-color: transparent; }
+		.chip.active.focus { background: var(--accent); }
+		.chip.active.shortBreak { background: var(--green); }
+		.chip.active.longBreak { background: var(--blue); }
+
+		.timer-wrap { text-align: center; padding: 16px 0 10px; }
+		.timer {
+			font-family: var(--mono);
+			font-size: 74px; font-weight: 700; line-height: 1;
+			letter-spacing: 2px; font-variant-numeric: tabular-nums;
+			transition: color .25s;
+		}
+		.timer.focus { color: var(--accent); }
+		.timer.shortBreak { color: var(--green); }
+		.timer.longBreak { color: var(--blue); }
+		.timer-mode { margin-top: 8px; color: var(--dim); font-size: 12.5px; }
+		.timer-progress {
+			margin: 12px auto 4px; height: 4px; width: 80%;
+			background: var(--panel-2); border-radius: 2px; overflow: hidden;
+		}
+		.timer-progress .bar { height: 100%; width: 100%; border-radius: 2px; transition: width .25s linear; }
+		.bar.focus { background: var(--accent); }
+		.bar.shortBreak { background: var(--green); }
+		.bar.longBreak { background: var(--blue); }
+
+		.pomo-stats { display: flex; justify-content: center; gap: 18px; margin: 10px 0 14px; color: var(--dim); font-size: 11.5px; }
+		.pomo-stats b { color: var(--text); font-size: 14px; font-family: var(--mono); }
+
+		.pomo-controls { display: flex; gap: 8px; justify-content: center; }
+		.pomo-controls .btn { min-width: 86px; padding: 10px 0; font-size: 13px; }
+
+		.settings { margin-top: 16px; }
+		.settings summary { cursor: pointer; color: var(--dim); font-size: 12px; user-select: none; }
+		.settings summary:hover { color: var(--text); }
+		.settings-grid {
+			display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+			margin-top: 10px;
+		}
+		.field label { display: block; color: var(--dim); font-size: 11px; margin-bottom: 4px; }
+		.field .input, .field .select { text-align: center; }
+		.check-row { display: flex; align-items: center; gap: 6px; color: var(--text); font-size: 12px; margin-top: 10px; }
+		.check-row input { accent-color: var(--accent); }
+
+		/* ---------- BYOX ---------- */
+		.section-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+		.section-title h2 { font-size: 13.5px; font-weight: 600; }
+		.stat-row { display: flex; gap: 8px; margin-bottom: 10px; }
+		.stat {
+			flex: 1; text-align: center; padding: 8px 4px;
+			background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+		}
+		.stat .n { font-size: 16px; font-weight: 700; font-family: var(--mono); color: var(--accent); }
+		.stat .l { font-size: 10.5px; color: var(--dim); margin-top: 2px; }
+
+		.filter-row { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+		.fchip {
+			padding: 4px 10px; border-radius: 20px; font-size: 11px;
+			border: 1px solid var(--border); color: var(--dim);
+		}
+		.fchip.active { background: var(--panel-2); color: var(--text); border-color: var(--accent); }
+
+		.proj-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 10px; }
+		.proj-head { display: flex; align-items: center; gap: 8px; }
+		.proj-name { font-weight: 600; font-size: 13px; flex: 1; }
+		.proj-goal { color: var(--dim); font-size: 12px; margin: 6px 0 8px; line-height: 1.5; }
+		.proj-progress { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+		.proj-progress .track { flex: 1; height: 6px; background: var(--panel-2); border-radius: 3px; overflow: hidden; }
+		.proj-progress .track .bar { height: 100%; background: var(--accent); border-radius: 3px; }
+		.proj-progress .pct { font-size: 11px; color: var(--dim); font-family: var(--mono); width: 34px; text-align: right; }
+		.proj-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+		.tag { font-size: 10.5px; padding: 2px 7px; border-radius: 4px; background: var(--panel-2); color: var(--dim); }
+		.proj-actions { display: flex; gap: 6px; justify-content: flex-end; }
+		.proj-ref {
+			display: inline-block; font-size: 11px; color: var(--blue);
+			text-decoration: none; margin-top: 2px;
+		}
+		.proj-ref:hover { text-decoration: underline; }
+
+		.badge { font-size: 10.5px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+		.badge.idea { background: #24324a; color: var(--blue); }
+		.badge.building { background: #3a2b16; color: var(--amber); }
+		.badge.paused { background: #2a2533; color: #a98fd8; }
+		.badge.done { background: #16321f; color: var(--green); }
+
+		.empty { text-align: center; color: #5b6574; padding: 28px 0; font-size: 12px; line-height: 2; }
+
+		/* ---------- 待办 ---------- */
+		.todo-add { display: flex; gap: 8px; margin-bottom: 10px; }
+		.todo-meta { display: flex; gap: 8px; margin-bottom: 10px; }
+		.todo-meta .select { flex: 1; }
+		.todo-item {
+			display: flex; align-items: center; gap: 10px;
+			padding: 10px 12px; background: var(--panel);
+			border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px;
+		}
+		.todo-item.done .todo-text { text-decoration: line-through; color: #5b6574; }
+		.todo-check {
+			width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--dim);
+			flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+			background: transparent; color: transparent; font-size: 11px;
+		}
+		.todo-item.done .todo-check { background: var(--green); border-color: var(--green); color: #10241a; }
+		.todo-body { flex: 1; min-width: 0; }
+		.todo-text { font-size: 12.5px; word-break: break-word; }
+		.todo-sub { display: flex; gap: 6px; align-items: center; margin-top: 4px; font-size: 10.5px; color: var(--dim); }
+		.todo-sub .cat { padding: 1px 6px; border-radius: 4px; background: var(--panel-2); }
+		.pdot { width: 8px; height: 8px; border-radius: 50%; }
+		.pdot.high { background: var(--red); }
+		.pdot.medium { background: var(--amber); }
+		.pdot.low { background: var(--dim); }
+		.todo-del {
+			width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
+			color: var(--dim); font-size: 14px;
+		}
+		.todo-del:hover { color: var(--red); background: var(--panel-2); }
+		.todo-footer {
+			display: flex; align-items: center; justify-content: space-between;
+			padding-top: 8px; color: var(--dim); font-size: 11.5px;
+		}
+
+		/* ---------- 弹层表单 ---------- */
+		.modal-mask {
+			position: fixed; inset: 0; background: rgba(0,0,0,.55);
+			display: none; align-items: center; justify-content: center; z-index: 10;
+		}
+		.modal-mask.show { display: flex; }
+		.modal {
+			width: calc(100% - 36px); max-height: 82%; overflow-y: auto;
+			background: var(--panel); border: 1px solid var(--border);
+			border-radius: 12px; padding: 16px;
+		}
+		.modal h3 { font-size: 14px; margin-bottom: 12px; }
+		.modal .field { margin-bottom: 10px; }
+		.modal .field input, .modal .field select, .modal .field textarea { width: 100%; }
+		.modal .field textarea { min-height: 56px; resize: vertical; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; outline: none; }
+		.modal .field textarea:focus { border-color: var(--accent); }
+		.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+	</style>
+</head>
+<body>
+	<div class="header">
+		<div class="logo">EE</div>
+		<div class="title">EE Workbench</div>
+		<span class="badge" id="envBadge">EDA</span>
+		<button class="close" id="closeBtn" title="关闭">✕</button>
+	</div>
+	<div class="preview-banner" id="previewBanner">预览模式：未检测到 EDA 环境，数据仅保存在浏览器本地。</div>
+
+	<div class="tabs">
+		<button class="tab active" data-tab="pomo">番茄钟</button>
+		<button class="tab" data-tab="byox">BYOX <span class="cnt" id="byoxCnt">0</span></button>
+		<button class="tab" data-tab="todo">待办 <span class="cnt" id="todoCnt">0</span></button>
+	</div>
+
+	<!-- ===================== 番茄钟 ===================== -->
+	<section class="view active" id="view-pomo">
+		<div class="mode-chips">
+			<button class="chip active focus" data-mode="focus">专注</button>
+			<button class="chip" data-mode="shortBreak">短休息</button>
+			<button class="chip" data-mode="longBreak">长休息</button>
+		</div>
+
+		<div class="card">
+			<div class="timer-wrap">
+				<div class="timer focus" id="pomoTimer">25:00</div>
+				<div class="timer-mode" id="pomoModeText">专注 · 准备开始</div>
+				<div class="timer-progress"><div class="bar focus" id="pomoBar"></div></div>
+			</div>
+			<div class="pomo-stats">
+				<span>本轮 <b id="pomoRound">1</b>/<span id="pomoRounds">4</span></span>
+				<span>已完成专注 <b id="pomoDone">0</b></span>
+			</div>
+			<div class="pomo-controls">
+				<button class="btn primary" id="pomoStart">开始</button>
+				<button class="btn" id="pomoReset">重置</button>
+				<button class="btn" id="pomoSkip">跳过</button>
+			</div>
+		</div>
+
+		<details class="settings card">
+			<summary>⚙ 设置</summary>
+			<div class="settings-grid">
+				<div class="field">
+					<label>专注时长（分钟）</label>
+					<input class="input" id="setFocus" type="number" min="1" max="180" value="25" />
+				</div>
+				<div class="field">
+					<label>短休息（分钟）</label>
+					<input class="input" id="setShort" type="number" min="1" max="60" value="5" />
+				</div>
+				<div class="field">
+					<label>长休息（分钟）</label>
+					<input class="input" id="setLong" type="number" min="1" max="90" value="15" />
+				</div>
+				<div class="field">
+					<label>长休间隔（轮）</label>
+					<input class="input" id="setRounds" type="number" min="1" max="12" value="4" />
+				</div>
+			</div>
+			<label class="check-row">
+				<input type="checkbox" id="setAuto" checked />
+				专注结束后自动开始休息
+			</label>
+		</details>
+	</section>
+
+	<!-- ===================== BYOX ===================== -->
+	<section class="view" id="view-byox">
+		<div class="section-title">
+			<h2>Build-Your-Own-X</h2>
+			<button class="btn primary small" id="byoxAdd">＋ 新建项目</button>
+		</div>
+		<div class="stat-row">
+			<div class="stat"><div class="n" id="byoxTotal">0</div><div class="l">全部</div></div>
+			<div class="stat"><div class="n" id="byoxBuilding">0</div><div class="l">进行中</div></div>
+			<div class="stat"><div class="n" id="byoxDone">0</div><div class="l">已完成</div></div>
+			<div class="stat"><div class="n" id="byoxIdea">0</div><div class="l">想法</div></div>
+		</div>
+		<div class="filter-row" id="byoxFilters"></div>
+		<div id="byoxList"></div>
+	</section>
+
+	<!-- ===================== 待办 ===================== -->
+	<section class="view" id="view-todo">
+		<div class="todo-add">
+			<input class="input grow" id="todoText" placeholder="例如：核对 U1 的封装引脚对应关系…" maxlength="200" />
+			<button class="btn green" id="todoAdd">添加</button>
+		</div>
+		<div class="todo-meta">
+			<select class="select" id="todoCat">
+				<option value="调试">调试</option>
+				<option value="BOM">BOM</option>
+				<option value="封装">封装</option>
+				<option value="PCB 改版">PCB 改版</option>
+				<option value="文档">文档</option>
+				<option value="其他" selected>其他</option>
+			</select>
+			<select class="select" id="todoPri">
+				<option value="high">高优先级</option>
+				<option value="medium" selected>中优先级</option>
+				<option value="low">低优先级</option>
+			</select>
+		</div>
+		<div class="filter-row" id="todoFilters"></div>
+		<div id="todoList"></div>
+		<div class="todo-footer">
+			<span id="todoStatsText">0 项未完成</span>
+			<button class="btn small" id="todoClearDone">清空已完成</button>
+		</div>
+	</section>
+
+	<!-- ===================== BYOX 表单弹层 ===================== -->
+	<div class="modal-mask" id="byoxModal">
+		<div class="modal">
+			<h3 id="byoxModalTitle">新建项目</h3>
+			<div class="field">
+				<label>项目名称 *</label>
+				<input class="input" id="byoxName" placeholder="例如：Build your own logic analyzer" maxlength="80" />
+			</div>
+			<div class="field">
+				<label>目标 / 一句话描述</label>
+				<textarea id="byoxGoal" placeholder="想实现什么？要验证哪些电路模块？"></textarea>
+			</div>
+			<div class="field">
+				<label>参考资料链接</label>
+				<input class="input" id="byoxRef" placeholder="https://…（数据手册 / 教程 / 仓库）" maxlength="300" />
+			</div>
+			<div class="row">
+				<div class="field grow">
+					<label>状态</label>
+					<select class="select" id="byoxStatus">
+						<option value="idea">想法</option>
+						<option value="building">进行中</option>
+						<option value="paused">暂停</option>
+						<option value="done">完成</option>
+					</select>
+				</div>
+				<div class="field grow">
+					<label>进度：<span id="byoxProgressLabel">0</span>%</label>
+					<input type="range" id="byoxProgress" min="0" max="100" step="5" value="0" style="width:100%; accent-color: var(--accent);" />
+				</div>
+			</div>
+			<div class="field">
+				<label>标签（逗号分隔）</label>
+				<input class="input" id="byoxTags" placeholder="电源, 逻辑分析, 学习" maxlength="120" />
+			</div>
+			<div class="modal-actions">
+				<button class="btn" id="byoxCancel">取消</button>
+				<button class="btn primary" id="byoxSave">保存</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+	(function () {
+		'use strict';
+
+		/* ================= 环境与存储适配 ================= */
+		const hasEda = typeof eda !== 'undefined' && !!eda.sys_Storage;
+		if (!hasEda) {
+			document.getElementById('previewBanner').style.display = 'block';
+			document.getElementById('envBadge').textContent = '预览';
+		}
+
+		const storage = {
+			async get(key) {
+				if (hasEda) {
+					try {
+						const v = eda.sys_Storage.getExtensionUserConfig(key);
+						if (v !== undefined && v !== null) return v;
+					} catch { /* fall through */ }
+				}
+				try {
+					const raw = localStorage.getItem('eeWorkbench.' + key);
+					return raw ? JSON.parse(raw) : undefined;
+				} catch {
+					return undefined;
+				}
+			},
+			async set(key, value) {
+				if (hasEda) {
+					try {
+						await eda.sys_Storage.setExtensionUserConfig(key, value);
+						return true;
+					} catch { /* fall through */ }
+				}
+				try {
+					localStorage.setItem('eeWorkbench.' + key, JSON.stringify(value));
+					return true;
+				} catch {
+					return false;
+				}
+			},
+		};
+
+		function toast(msg, type, timer) {
+			try {
+				if (hasEda) {
+					eda.sys_Message.showToastMessage(msg, type || 'info', timer || 3);
+					return;
+				}
+			} catch { /* fall through */ }
+			console.log('[EE Workbench]', msg);
+		}
+
+		function confirmDialog(msg, onOk) {
+			if (hasEda) {
+				try {
+					eda.sys_Dialog.showConfirmationMessage(msg, 'EE Workbench', '确定', '取消', (ok) => { if (ok) onOk(); });
+					return;
+				} catch { /* fall through */ }
+			}
+			if (window.confirm(msg)) onOk();
+		}
+
+		function beep() {
+			try {
+				const Ctx = window.AudioContext || window.webkitAudioContext;
+				if (!Ctx) return;
+				const ctx = new Ctx();
+				[880, 660, 880].forEach((freq, i) => {
+					const osc = ctx.createOscillator();
+					const gain = ctx.createGain();
+					osc.type = 'sine';
+					osc.frequency.value = freq;
+					gain.gain.setValueAtTime(0.0001, ctx.currentTime + i * 0.28);
+					gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + i * 0.28 + 0.03);
+					gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + i * 0.28 + 0.26);
+					osc.connect(gain).connect(ctx.destination);
+					osc.start(ctx.currentTime + i * 0.28);
+					osc.stop(ctx.currentTime + i * 0.28 + 0.3);
+				});
+			} catch { /* 无声环境忽略 */ }
+		}
+
+		function uid(prefix) {
+			return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+		}
+		function esc(s) { return String(s || ''); }
+		function fmtDate(ts) {
+			if (!ts) return '';
+			const d = new Date(ts);
+			const p = n => String(n).padStart(2, '0');
+			return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+		}
+
+		/* ================= 标签页切换 ================= */
+		const tabs = document.querySelectorAll('.tab');
+		tabs.forEach(tab => tab.addEventListener('click', () => {
+			tabs.forEach(t => t.classList.toggle('active', t === tab));
+			document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+			document.getElementById('view-' + tab.dataset.tab).classList.add('active');
+		}));
+
+		document.getElementById('closeBtn').addEventListener('click', () => {
+			if (hasEda) {
+				try { eda.sys_IFrame.closeIFrame('ee-workbench'); } catch { /* noop */ }
+			}
+		});
+
+		/* ================= 番茄钟 ================= */
+		const MODE = { FOCUS: 'focus', SHORT_BREAK: 'shortBreak', LONG_BREAK: 'longBreak' };
+		const MODE_TEXT = { focus: '专注', shortBreak: '短休息', longBreak: '长休息' };
+		const DEFAULT_SETTINGS = { focusMin: 25, shortBreakMin: 5, longBreakMin: 15, rounds: 4, autoStartNext: true };
+
+		let pomo = null;
+		let pomoTick = null;
+
+		function pomoDefaults() {
+			const duration = 25 * 60 * 1000;
+			return {
+				mode: MODE.FOCUS, status: 'idle',
+				durationMs: duration, remainingMs: duration, endAt: 0,
+				completedFocus: 0, completedRounds: 0,
+				settings: Object.assign({}, DEFAULT_SETTINGS), updatedAt: 0,
+			};
+		}
+		function modeDuration(mode, settings) {
+			const mins = mode === MODE.FOCUS ? settings.focusMin
+				: mode === MODE.SHORT_BREAK ? settings.shortBreakMin : settings.longBreakMin;
+			return Math.max(1, Number(mins) || 1) * 60 * 1000;
+		}
+		function remainingOf(s, now) {
+			if (s.status !== 'running' || !s.endAt) return Math.max(0, s.remainingMs || 0);
+			return Math.max(0, s.endAt - now);
+		}
+		function fmtMs(ms) {
+			const total = Math.max(0, Math.ceil(ms / 1000));
+			const h = Math.floor(total / 3600);
+			const m = Math.floor((total % 3600) / 60);
+			const s = total % 60;
+			const mm = String(m).padStart(2, '0');
+			const ss = String(s).padStart(2, '0');
+			return h > 0 ? h + ':' + mm + ':' + ss : mm + ':' + ss;
+		}
+
+		async function savePomo() {
+			pomo.updatedAt = Date.now();
+			await storage.set('pomodoro', pomo);
+		}
+
+		async function loadPomo() {
+			const raw = await storage.get('pomodoro');
+			if (raw && raw.mode && raw.settings) {
+				pomo = Object.assign(pomoDefaults(), raw, { settings: Object.assign({}, DEFAULT_SETTINGS, raw.settings) });
+				// 跨会话恢复：运行中的计时按 endAt 继续
+				if (pomo.status === 'running' && pomo.endAt && pomo.endAt <= Date.now()) {
+					completePomoPhase();
+				}
+			}
+			else {
+				pomo = pomoDefaults();
+			}
+			// 设置输入框与已保存配置同步
+			document.getElementById('setFocus').value = pomo.settings.focusMin;
+			document.getElementById('setShort').value = pomo.settings.shortBreakMin;
+			document.getElementById('setLong').value = pomo.settings.longBreakMin;
+			document.getElementById('setRounds').value = pomo.settings.rounds;
+			document.getElementById('setAuto').checked = !!pomo.settings.autoStartNext;
+			renderPomo();
+			startPomoTick();
+		}
+
+		function renderPomo() {
+			const remaining = remainingOf(pomo, Date.now());
+			const duration = pomo.durationMs || modeDuration(pomo.mode, pomo.settings);
+			const el = document.getElementById('pomoTimer');
+			el.textContent = fmtMs(remaining);
+			el.className = 'timer ' + pomo.mode;
+			document.getElementById('pomoBar').className = 'bar ' + pomo.mode;
+			document.getElementById('pomoBar').style.width = Math.max(0, Math.min(100, (remaining / duration) * 100)) + '%';
+			document.getElementById('pomoModeText').textContent = MODE_TEXT[pomo.mode] + ' · ' + statusText();
+			document.getElementById('pomoRound').textContent = Math.min(pomo.completedFocus + 1, pomo.settings.rounds);
+			document.getElementById('pomoRounds').textContent = pomo.settings.rounds;
+			document.getElementById('pomoDone').textContent = pomo.completedFocus;
+
+			document.querySelectorAll('.chip[data-mode]').forEach(chip => {
+				const active = chip.dataset.mode === pomo.mode;
+				chip.classList.toggle('active', active);
+				chip.className = 'chip' + (active ? ' active ' + pomo.mode : '');
+			});
+
+			const start = document.getElementById('pomoStart');
+			start.textContent = pomo.status === 'running' ? '暂停' : (pomo.status === 'paused' ? '继续' : '开始');
+		}
+		function statusText() {
+			if (pomo.status === 'running') return '计时中';
+			if (pomo.status === 'paused') return '已暂停';
+			return '准备开始';
+		}
+
+		function startPomoTick() {
+			if (pomoTick) clearInterval(pomoTick);
+			pomoTick = setInterval(() => {
+				if (pomo.status !== 'running') return;
+				if (remainingOf(pomo, Date.now()) <= 0) {
+					completePomoPhase();
+				}
+				else {
+					renderPomo();
+				}
+			}, 250);
+		}
+
+		async function completePomoPhase() {
+			const finished = Object.assign({}, pomo);
+			const wasFocus = pomo.mode === MODE.FOCUS;
+			// 推进状态机
+			if (wasFocus) {
+				const completed = pomo.completedFocus + 1;
+				const isLong = completed % (pomo.settings.rounds || 4) === 0;
+				pomo.mode = isLong ? MODE.LONG_BREAK : MODE.SHORT_BREAK;
+				pomo.completedFocus = completed;
+				if (isLong) pomo.completedRounds += 1;
+				toast('专注完成！' + (pomo.settings.autoStartNext ? '开始' : '进入') + MODE_TEXT[pomo.mode], 'success', 4);
+			}
+			else {
+				pomo.mode = MODE.FOCUS;
+				toast('休息结束，准备下一轮专注', 'info', 3);
+			}
+			pomo.durationMs = modeDuration(pomo.mode, pomo.settings);
+			pomo.remainingMs = pomo.durationMs;
+			pomo.status = 'idle';
+			pomo.endAt = 0;
+			await savePomo();
+			renderPomo();
+			beep();
+			if (wasFocus && pomo.settings.autoStartNext) {
+				startPomo();
+			}
+		}
+
+		function startPomo() {
+			if (pomo.status === 'running') {
+				pomo.status = 'paused';
+				pomo.endAt = 0;
+			}
+			else {
+				if (pomo.status !== 'paused') {
+					pomo.durationMs = modeDuration(pomo.mode, pomo.settings);
+					pomo.remainingMs = pomo.durationMs;
+				}
+				pomo.status = 'running';
+				pomo.endAt = Date.now() + Math.max(0, pomo.remainingMs);
+			}
+			savePomo();
+			renderPomo();
+		}
+
+		function resetPomo() {
+			pomo.durationMs = modeDuration(pomo.mode, pomo.settings);
+			pomo.remainingMs = pomo.durationMs;
+			pomo.status = 'idle';
+			pomo.endAt = 0;
+			savePomo();
+			renderPomo();
+		}
+
+		function skipPomo() {
+			completePomoPhase();
+		}
+
+		document.getElementById('pomoStart').addEventListener('click', startPomo);
+		document.getElementById('pomoReset').addEventListener('click', resetPomo);
+		document.getElementById('pomoSkip').addEventListener('click', skipPomo);
+		document.querySelectorAll('.chip[data-mode]').forEach(chip => {
+			chip.addEventListener('click', () => {
+				if (pomo.status === 'running') {
+					confirmDialog('当前计时进行中，切换模式会中断计时，确定吗？', () => {
+						pomo.mode = chip.dataset.mode;
+						pomo.status = 'idle';
+						pomo.endAt = 0;
+						pomo.durationMs = modeDuration(pomo.mode, pomo.settings);
+						pomo.remainingMs = pomo.durationMs;
+						savePomo();
+						renderPomo();
+					});
+					return;
+				}
+				pomo.mode = chip.dataset.mode;
+				pomo.durationMs = modeDuration(pomo.mode, pomo.settings);
+				pomo.remainingMs = pomo.durationMs;
+				savePomo();
+				renderPomo();
+			});
+		});
+
+		function applySettings() {
+			const s = pomo.settings;
+			s.focusMin = clampNum(document.getElementById('setFocus').value, 1, 180, 25);
+			s.shortBreakMin = clampNum(document.getElementById('setShort').value, 1, 60, 5);
+			s.longBreakMin = clampNum(document.getElementById('setLong').value, 1, 90, 15);
+			s.rounds = clampNum(document.getElementById('setRounds').value, 1, 12, 4);
+			s.autoStartNext = document.getElementById('setAuto').checked;
+			if (pomo.status !== 'running') {
+				pomo.durationMs = modeDuration(pomo.mode, s);
+				pomo.remainingMs = pomo.durationMs;
+			}
+			savePomo();
+			renderPomo();
+			toast('设置已保存', 'success', 2);
+		}
+		function clampNum(v, min, max, fallback) {
+			const n = parseInt(v, 10);
+			if (isNaN(n)) return fallback;
+			return Math.min(max, Math.max(min, n));
+		}
+
+		document.getElementById('setFocus').addEventListener('change', applySettings);
+		document.getElementById('setShort').addEventListener('change', applySettings);
+		document.getElementById('setLong').addEventListener('change', applySettings);
+		document.getElementById('setRounds').addEventListener('change', applySettings);
+		document.getElementById('setAuto').addEventListener('change', applySettings);
+
+		/* ================= BYOX ================= */
+		const PROJECT_STATUSES = ['idea', 'building', 'paused', 'done'];
+		const STATUS_LABELS = { idea: '想法', building: '进行中', paused: '暂停', done: '完成' };
+		let projects = [];
+		let byoxFilter = 'all';
+		let editingProjectId = null;
+
+		async function loadProjects() {
+			const raw = await storage.get('projects');
+			projects = Array.isArray(raw) ? raw.filter(p => p && p.name) : [];
+			renderByox();
+		}
+		async function saveProjects() {
+			await storage.set('projects', projects);
+			renderByox();
+		}
+
+		function renderByox() {
+			const stats = {
+				total: projects.length,
+				building: projects.filter(p => p.status === 'building').length,
+				done: projects.filter(p => p.status === 'done').length,
+				idea: projects.filter(p => p.status === 'idea').length,
+			};
+			document.getElementById('byoxCnt').textContent = projects.length;
+			document.getElementById('byoxTotal').textContent = stats.total;
+			document.getElementById('byoxBuilding').textContent = stats.building;
+			document.getElementById('byoxDone').textContent = stats.done;
+			document.getElementById('byoxIdea').textContent = stats.idea;
+
+			// 过滤器
+			const filters = document.getElementById('byoxFilters');
+			filters.innerHTML = '';
+			['all', ...PROJECT_STATUSES].forEach(st => {
+				const b = document.createElement('button');
+				b.className = 'fchip' + (byoxFilter === st ? ' active' : '');
+				b.textContent = st === 'all' ? '全部' : STATUS_LABELS[st];
+				b.addEventListener('click', () => { byoxFilter = st; renderByox(); });
+				filters.appendChild(b);
+			});
+
+			const list = document.getElementById('byoxList');
+			list.innerHTML = '';
+			const filtered = byoxFilter === 'all' ? projects : projects.filter(p => p.status === byoxFilter);
+			if (filtered.length === 0) {
+				const empty = document.createElement('div');
+				empty.className = 'empty';
+				empty.innerHTML = projects.length === 0
+					? '还没有项目。<br/>点右上角「＋ 新建项目」，<br/>记录你的第一个 build-your-own-x 想法。'
+					: '该状态下暂无项目。';
+				list.appendChild(empty);
+				return;
+			}
+			filtered.forEach(p => list.appendChild(renderProjectCard(p)));
+		}
+
+		function renderProjectCard(p) {
+			const card = document.createElement('div');
+			card.className = 'proj-card';
+
+			const head = document.createElement('div');
+			head.className = 'proj-head';
+			const name = document.createElement('div');
+			name.className = 'proj-name';
+			name.textContent = p.name;
+			const badge = document.createElement('span');
+			badge.className = 'badge ' + (STATUS_LABELS[p.status] ? p.status : 'idea');
+			badge.textContent = STATUS_LABELS[p.status] || '想法';
+			head.appendChild(name);
+			head.appendChild(badge);
+			card.appendChild(head);
+
+			if (p.goal) {
+				const goal = document.createElement('div');
+				goal.className = 'proj-goal';
+				goal.textContent = p.goal;
+				card.appendChild(goal);
+			}
+
+			const prog = document.createElement('div');
+			prog.className = 'proj-progress';
+			const track = document.createElement('div');
+			track.className = 'track';
+			const bar = document.createElement('div');
+			bar.className = 'bar';
+			bar.style.width = Math.min(100, Math.max(0, Number(p.progress) || 0)) + '%';
+			track.appendChild(bar);
+			const pct = document.createElement('div');
+			pct.className = 'pct';
+			pct.textContent = (Number(p.progress) || 0) + '%';
+			prog.appendChild(track);
+			prog.appendChild(pct);
+			card.appendChild(prog);
+
+			if (Array.isArray(p.tags) && p.tags.length) {
+				const tags = document.createElement('div');
+				tags.className = 'proj-tags';
+				p.tags.forEach(t => {
+					const tag = document.createElement('span');
+					tag.className = 'tag';
+					tag.textContent = t;
+					tags.appendChild(tag);
+				});
+				card.appendChild(tags);
+			}
+
+			if (p.reference) {
+				const ref = document.createElement('a');
+				ref.className = 'proj-ref';
+				ref.href = /^https?:\/\//i.test(p.reference) ? p.reference : 'https://' + p.reference;
+				ref.target = '_blank';
+				ref.rel = 'noopener noreferrer';
+				ref.textContent = '🔗 ' + p.reference;
+				card.appendChild(ref);
+			}
+
+			const actions = document.createElement('div');
+			actions.className = 'proj-actions';
+			const edit = document.createElement('button');
+			edit.className = 'btn small';
+			edit.textContent = '编辑';
+			edit.addEventListener('click', () => openByoxModal(p));
+			const del = document.createElement('button');
+			del.className = 'btn small';
+			del.textContent = '删除';
+			del.addEventListener('click', () => {
+				confirmDialog('删除项目「' + p.name + '」？', async () => {
+					projects = projects.filter(x => x.id !== p.id);
+					await saveProjects();
+				});
+			});
+			actions.appendChild(edit);
+			actions.appendChild(del);
+			card.appendChild(actions);
+			return card;
+		}
+
+		function openByoxModal(p) {
+			editingProjectId = p ? p.id : null;
+			document.getElementById('byoxModalTitle').textContent = p ? '编辑项目' : '新建项目';
+			document.getElementById('byoxName').value = p ? p.name : '';
+			document.getElementById('byoxGoal').value = p ? p.goal : '';
+			document.getElementById('byoxRef').value = p ? p.reference : '';
+			document.getElementById('byoxStatus').value = p && p.status ? p.status : 'idea';
+			const prog = p ? Number(p.progress) || 0 : 0;
+			document.getElementById('byoxProgress').value = prog;
+			document.getElementById('byoxProgressLabel').textContent = prog;
+			document.getElementById('byoxTags').value = Array.isArray(p && p.tags) ? p.tags.join(', ') : '';
+			document.getElementById('byoxModal').classList.add('show');
+			setTimeout(() => document.getElementById('byoxName').focus(), 30);
+		}
+		function closeByoxModal() {
+			document.getElementById('byoxModal').classList.remove('show');
+			editingProjectId = null;
+		}
+
+		async function saveByoxFromModal() {
+			const name = document.getElementById('byoxName').value.trim();
+			if (!name) {
+				toast('项目名称不能为空', 'warn', 3);
+				return;
+			}
+			const payload = {
+				name,
+				goal: document.getElementById('byoxGoal').value.trim(),
+				reference: document.getElementById('byoxRef').value.trim(),
+				status: document.getElementById('byoxStatus').value,
+				progress: Math.min(100, Math.max(0, parseInt(document.getElementById('byoxProgress').value, 10) || 0)),
+				tags: document.getElementById('byoxTags').value.split(/[,，]/).map(s => s.trim()).filter(Boolean),
+			};
+			if (editingProjectId) {
+				const idx = projects.findIndex(x => x.id === editingProjectId);
+				if (idx >= 0) {
+					projects[idx] = Object.assign({}, projects[idx], payload, { updatedAt: Date.now() });
+				}
+			}
+			else {
+				projects.unshift(Object.assign({ id: uid('proj'), createdAt: Date.now(), updatedAt: Date.now() }, payload));
+			}
+			await saveProjects();
+			closeByoxModal();
+			toast('已保存', 'success', 2);
+		}
+
+		document.getElementById('byoxAdd').addEventListener('click', () => openByoxModal(null));
+		document.getElementById('byoxCancel').addEventListener('click', closeByoxModal);
+		document.getElementById('byoxSave').addEventListener('click', saveByoxFromModal);
+		document.getElementById('byoxProgress').addEventListener('input', e => {
+			document.getElementById('byoxProgressLabel').textContent = e.target.value;
+		});
+		document.getElementById('byoxModal').addEventListener('click', e => {
+			if (e.target === e.currentTarget) closeByoxModal();
+		});
+
+		/* ================= 待办 ================= */
+		const TODO_CATEGORIES = ['调试', 'BOM', '封装', 'PCB 改版', '文档', '其他'];
+		let todos = [];
+		let todoFilter = 'open';
+
+		async function loadTodos() {
+			const raw = await storage.get('todos');
+			todos = Array.isArray(raw) ? raw.filter(t => t && t.text) : [];
+			renderTodos();
+		}
+		async function saveTodos() {
+			await storage.set('todos', todos);
+			renderTodos();
+		}
+
+		function renderTodos() {
+			const open = todos.filter(t => !t.done).length;
+			const done = todos.filter(t => t.done).length;
+			document.getElementById('todoCnt').textContent = todos.length;
+			document.getElementById('todoStatsText').textContent = open + ' 项未完成 · 已完成 ' + done + ' 项';
+
+			const filters = document.getElementById('todoFilters');
+			filters.innerHTML = '';
+			[['all', '全部'], ['open', '未完成'], ['done', '已完成']].forEach(([k, label]) => {
+				const b = document.createElement('button');
+				b.className = 'fchip' + (todoFilter === k ? ' active' : '');
+				b.textContent = label;
+				b.addEventListener('click', () => { todoFilter = k; renderTodos(); });
+				filters.appendChild(b);
+			});
+
+			const list = document.getElementById('todoList');
+			list.innerHTML = '';
+			const filtered = todoFilter === 'all' ? todos
+				: todoFilter === 'done' ? todos.filter(t => t.done) : todos.filter(t => !t.done);
+			if (filtered.length === 0) {
+				const empty = document.createElement('div');
+				empty.className = 'empty';
+				empty.textContent = todoFilter === 'open'
+					? '暂无待办。\n把调试问题、BOM 核对、封装检查记下来。'
+					: '这里空空如也。';
+				list.appendChild(empty);
+				return;
+			}
+			filtered.forEach(t => list.appendChild(renderTodoItem(t)));
+		}
+
+		function renderTodoItem(t) {
+			const item = document.createElement('div');
+			item.className = 'todo-item' + (t.done ? ' done' : '');
+
+			const check = document.createElement('button');
+			check.className = 'todo-check';
+			check.textContent = '✓';
+			check.title = t.done ? '标记为未完成' : '标记为完成';
+			check.addEventListener('click', async () => {
+				const target = todos.find(x => x.id === t.id);
+				if (target) {
+					target.done = !target.done;
+					target.completedAt = target.done ? Date.now() : null;
+					await saveTodos();
+				}
+			});
+			item.appendChild(check);
+
+			const body = document.createElement('div');
+			body.className = 'todo-body';
+			const text = document.createElement('div');
+			text.className = 'todo-text';
+			text.textContent = t.text;
+			body.appendChild(text);
+			const sub = document.createElement('div');
+			sub.className = 'todo-sub';
+			const cat = document.createElement('span');
+			cat.className = 'cat';
+			cat.textContent = t.category || '其他';
+			sub.appendChild(cat);
+			const dot = document.createElement('span');
+			dot.className = 'pdot ' + (t.priority || 'medium');
+			dot.title = { high: '高优先级', medium: '中优先级', low: '低优先级' }[t.priority || 'medium'];
+			sub.appendChild(dot);
+			const time = document.createElement('span');
+			time.textContent = fmtDate(t.createdAt);
+			sub.appendChild(time);
+			body.appendChild(sub);
+			item.appendChild(body);
+
+			const del = document.createElement('button');
+			del.className = 'todo-del';
+			del.textContent = '🗑';
+			del.title = '删除';
+			del.addEventListener('click', async () => {
+				confirmDialog('删除这条待办？', async () => {
+					todos = todos.filter(x => x.id !== t.id);
+					await saveTodos();
+				});
+			});
+			item.appendChild(del);
+			return item;
+		}
+
+		async function addTodo() {
+			const input = document.getElementById('todoText');
+			const text = input.value.trim();
+			if (!text) {
+				toast('请输入待办内容', 'warn', 2);
+				return;
+			}
+			todos.unshift({
+				id: uid('todo'),
+				text,
+				done: false,
+				priority: document.getElementById('todoPri').value,
+				category: document.getElementById('todoCat').value,
+				createdAt: Date.now(),
+				completedAt: null,
+				source: '',
+			});
+			input.value = '';
+			await saveTodos();
+			toast('已添加', 'success', 2);
+		}
+
+		document.getElementById('todoAdd').addEventListener('click', addTodo);
+		document.getElementById('todoText').addEventListener('keydown', e => {
+			if (e.key === 'Enter') addTodo();
+		});
+		document.getElementById('todoClearDone').addEventListener('click', () => {
+			if (!todos.some(t => t.done)) return;
+			confirmDialog('清空全部已完成的待办？', async () => {
+				todos = todos.filter(t => !t.done);
+				await saveTodos();
+			});
+		});
+
+		/* ================= 启动 ================= */
+		Promise.all([loadPomo(), loadProjects(), loadTodos()]).then(() => {
+			if (hasEda) {
+				try { eda.sys_Message.showToastMessage('EE Workbench 已就绪', 'info', 2); } catch { /* noop */ }
+			}
+		});
+	})();
+	</script>
+</body>
+</html>
