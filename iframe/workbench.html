@@ -5,20 +5,49 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<style>
-		:root {
+		:root, :root[data-theme="dark"] {
 			--bg: #12161c;
 			--panel: #1a2028;
 			--panel-2: #212a35;
 			--border: #2c3542;
 			--text: #e8edf3;
 			--dim: #8a94a3;
+			--faint: #5b6574;
 			--accent: #ff6b4a;
 			--green: #35c26b;
 			--blue: #4a9eff;
 			--amber: #f0a63e;
 			--red: #e5534b;
+			--purple: #a98fd8;
+			--badge-idea-bg: #24324a; --badge-idea-fg: #7ab0ff;
+			--badge-building-bg: #3a2b16; --badge-building-fg: #ffc66d;
+			--badge-paused-bg: #2a2533; --badge-paused-fg: #b99be0;
+			--badge-done-bg: #16321f; --badge-done-fg: #5fdf8d;
+			--banner-bg: #2b2416; --banner-border: #4a3d1f;
+			--shadow: rgba(0,0,0,.35);
 			--radius: 10px;
 			--mono: "SF Mono", "JetBrains Mono", Consolas, "Courier New", monospace;
+		}
+		:root[data-theme="light"] {
+			--bg: #f3f6fa;
+			--panel: #ffffff;
+			--panel-2: #e9edf3;
+			--border: #d7dde6;
+			--text: #1d2530;
+			--dim: #5b6b80;
+			--faint: #94a3b8;
+			--accent: #e0552f;
+			--green: #1f9d55;
+			--blue: #2f7fe0;
+			--amber: #c77f1a;
+			--red: #d64545;
+			--purple: #7c5cbf;
+			--badge-idea-bg: #e3ecfa; --badge-idea-fg: #2f6fc0;
+			--badge-building-bg: #fdeeda; --badge-building-fg: #a05a00;
+			--badge-paused-bg: #ece4f8; --badge-paused-fg: #6d4fa8;
+			--badge-done-bg: #ddf3e5; --badge-done-fg: #157a3d;
+			--banner-bg: #fdf3d8; --banner-border: #e6cf94;
+			--shadow: rgba(30,45,70,.12);
 		}
 		* { box-sizing: border-box; margin: 0; padding: 0; }
 		html, body { height: 100%; }
@@ -31,6 +60,7 @@
 			flex-direction: column;
 			overflow: hidden;
 			user-select: none;
+			transition: background .2s, color .2s;
 		}
 		button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 		input, select, textarea { font-family: inherit; }
@@ -42,6 +72,7 @@
 			background: var(--panel);
 			border-bottom: 1px solid var(--border);
 			flex-shrink: 0;
+			transition: background .2s;
 		}
 		.header .logo {
 			width: 22px; height: 22px; border-radius: 6px;
@@ -55,19 +86,19 @@
 			font-size: 10px; color: var(--dim);
 			border: 1px solid var(--border); border-radius: 20px; padding: 2px 8px;
 		}
-		.header .close {
+		.header .icon-btn {
 			width: 26px; height: 26px; border-radius: 6px;
 			display: flex; align-items: center; justify-content: center;
 			color: var(--dim); font-size: 15px;
 		}
-		.header .close:hover { background: var(--panel-2); color: var(--text); }
+		.header .icon-btn:hover { background: var(--panel-2); color: var(--text); }
 
 		/* ---------- 预览模式横幅 ---------- */
 		.preview-banner {
 			display: none;
-			background: #2b2416; color: var(--amber);
+			background: var(--banner-bg); color: var(--amber);
 			padding: 6px 14px; font-size: 11.5px;
-			border-bottom: 1px solid #4a3d1f;
+			border-bottom: 1px solid var(--banner-border);
 			flex-shrink: 0;
 		}
 
@@ -101,6 +132,7 @@
 			background: var(--panel); border: 1px solid var(--border);
 			border-radius: var(--radius); padding: 14px;
 			margin-bottom: 12px;
+			transition: background .2s;
 		}
 		.btn {
 			padding: 7px 14px; border-radius: 8px;
@@ -109,9 +141,10 @@
 			border: 1px solid var(--border);
 			transition: filter .12s, background .12s;
 		}
-		.btn:hover { filter: brightness(1.15); }
+		.btn:hover { filter: brightness(1.08); }
 		.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-		.btn.green { background: var(--green); border-color: var(--green); color: #10241a; }
+		.btn.green { background: var(--green); border-color: var(--green); color: #fff; }
+		.btn.blue { background: var(--blue); border-color: var(--blue); color: #fff; }
 		.btn.small { padding: 4px 9px; font-size: 11.5px; border-radius: 6px; }
 		.btn:disabled { opacity: .45; cursor: not-allowed; }
 		.input, .select {
@@ -121,7 +154,7 @@
 			font-size: 12.5px; outline: none;
 		}
 		.input:focus, .select:focus { border-color: var(--accent); }
-		.input::placeholder { color: #5b6574; }
+		.input::placeholder { color: var(--faint); }
 		.hint { color: var(--dim); font-size: 11px; }
 		.row { display: flex; gap: 8px; align-items: center; }
 		.grow { flex: 1; }
@@ -181,6 +214,25 @@
 		/* ---------- BYOX ---------- */
 		.section-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 		.section-title h2 { font-size: 13.5px; font-weight: 600; }
+
+		.ask-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 12px; background: linear-gradient(180deg, var(--panel), var(--bg)); }
+		.ask-card .ask-label { font-size: 12px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+		.ask-card .ask-label span { color: var(--accent); }
+		.ask-row { display: flex; gap: 8px; }
+		.ask-hint { margin-top: 6px; font-size: 11px; color: var(--dim); }
+
+		.search-row { display: flex; gap: 8px; margin-bottom: 8px; }
+		.search-hint { font-size: 11px; color: var(--dim); margin-bottom: 12px; }
+
+		.match-card {
+			border: 1px solid var(--border); border-left: 3px solid var(--accent);
+			border-radius: 8px; padding: 10px 12px; margin-top: 10px; background: var(--panel);
+		}
+		.match-card .m-title { font-weight: 600; font-size: 12.5px; }
+		.match-card .m-meta { color: var(--dim); font-size: 11px; margin: 3px 0 6px; }
+		.match-card .m-desc { color: var(--text); font-size: 12px; line-height: 1.55; margin-bottom: 8px; }
+		.match-card .m-actions { display: flex; gap: 6px; justify-content: flex-end; }
+
 		.stat-row { display: flex; gap: 8px; margin-bottom: 10px; }
 		.stat {
 			flex: 1; text-align: center; padding: 8px 4px;
@@ -194,7 +246,22 @@
 			padding: 4px 10px; border-radius: 20px; font-size: 11px;
 			border: 1px solid var(--border); color: var(--dim);
 		}
+		.fchip:hover { color: var(--text); }
 		.fchip.active { background: var(--panel-2); color: var(--text); border-color: var(--accent); }
+
+		.idea-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+		.idea-card {
+			background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+			padding: 10px; display: flex; flex-direction: column; gap: 5px;
+		}
+		.idea-card .i-title { font-weight: 600; font-size: 12px; line-height: 1.35; }
+		.idea-card .i-meta { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+		.idea-card .i-desc { color: var(--dim); font-size: 11px; line-height: 1.45; flex: 1; }
+		.idea-card .i-actions { display: flex; gap: 5px; justify-content: flex-end; }
+		.src-tag { font-size: 10px; padding: 1px 6px; border-radius: 4px; }
+		.src-tag.classic { background: var(--badge-idea-bg); color: var(--badge-idea-fg); }
+		.src-tag.bootcamp { background: var(--badge-building-bg); color: var(--badge-building-fg); }
+		.diff { font-size: 10px; color: var(--dim); }
 
 		.proj-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 10px; }
 		.proj-head { display: flex; align-items: center; gap: 8px; }
@@ -206,7 +273,7 @@
 		.proj-progress .pct { font-size: 11px; color: var(--dim); font-family: var(--mono); width: 34px; text-align: right; }
 		.proj-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
 		.tag { font-size: 10.5px; padding: 2px 7px; border-radius: 4px; background: var(--panel-2); color: var(--dim); }
-		.proj-actions { display: flex; gap: 6px; justify-content: flex-end; }
+		.proj-actions { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
 		.proj-ref {
 			display: inline-block; font-size: 11px; color: var(--blue);
 			text-decoration: none; margin-top: 2px;
@@ -214,12 +281,12 @@
 		.proj-ref:hover { text-decoration: underline; }
 
 		.badge { font-size: 10.5px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
-		.badge.idea { background: #24324a; color: var(--blue); }
-		.badge.building { background: #3a2b16; color: var(--amber); }
-		.badge.paused { background: #2a2533; color: #a98fd8; }
-		.badge.done { background: #16321f; color: var(--green); }
+		.badge.idea { background: var(--badge-idea-bg); color: var(--badge-idea-fg); }
+		.badge.building { background: var(--badge-building-bg); color: var(--badge-building-fg); }
+		.badge.paused { background: var(--badge-paused-bg); color: var(--badge-paused-fg); }
+		.badge.done { background: var(--badge-done-bg); color: var(--badge-done-fg); }
 
-		.empty { text-align: center; color: #5b6574; padding: 28px 0; font-size: 12px; line-height: 2; }
+		.empty { text-align: center; color: var(--faint); padding: 28px 0; font-size: 12px; line-height: 2; }
 
 		/* ---------- 待办 ---------- */
 		.todo-add { display: flex; gap: 8px; margin-bottom: 10px; }
@@ -230,17 +297,18 @@
 			padding: 10px 12px; background: var(--panel);
 			border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px;
 		}
-		.todo-item.done .todo-text { text-decoration: line-through; color: #5b6574; }
+		.todo-item.done .todo-text { text-decoration: line-through; color: var(--faint); }
 		.todo-check {
 			width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--dim);
 			flex-shrink: 0; display: flex; align-items: center; justify-content: center;
 			background: transparent; color: transparent; font-size: 11px;
 		}
-		.todo-item.done .todo-check { background: var(--green); border-color: var(--green); color: #10241a; }
+		.todo-item.done .todo-check { background: var(--green); border-color: var(--green); color: #fff; }
 		.todo-body { flex: 1; min-width: 0; }
 		.todo-text { font-size: 12.5px; word-break: break-word; }
-		.todo-sub { display: flex; gap: 6px; align-items: center; margin-top: 4px; font-size: 10.5px; color: var(--dim); }
+		.todo-sub { display: flex; gap: 6px; align-items: center; margin-top: 4px; font-size: 10.5px; color: var(--dim); flex-wrap: wrap; }
 		.todo-sub .cat { padding: 1px 6px; border-radius: 4px; background: var(--panel-2); }
+		.todo-sub .proj-tag { padding: 1px 6px; border-radius: 4px; background: var(--badge-building-bg); color: var(--badge-building-fg); font-weight: 600; }
 		.pdot { width: 8px; height: 8px; border-radius: 50%; }
 		.pdot.high { background: var(--red); }
 		.pdot.medium { background: var(--amber); }
@@ -257,21 +325,35 @@
 
 		/* ---------- 弹层表单 ---------- */
 		.modal-mask {
-			position: fixed; inset: 0; background: rgba(0,0,0,.55);
+			position: fixed; inset: 0; background: var(--shadow);
 			display: none; align-items: center; justify-content: center; z-index: 10;
 		}
 		.modal-mask.show { display: flex; }
 		.modal {
-			width: calc(100% - 36px); max-height: 82%; overflow-y: auto;
+			width: calc(100% - 36px); max-height: 84%; overflow-y: auto;
 			background: var(--panel); border: 1px solid var(--border);
 			border-radius: 12px; padding: 16px;
 		}
-		.modal h3 { font-size: 14px; margin-bottom: 12px; }
+		.modal h3 { font-size: 14px; margin-bottom: 4px; }
+		.modal .modal-sub { color: var(--dim); font-size: 11.5px; margin-bottom: 12px; line-height: 1.5; }
 		.modal .field { margin-bottom: 10px; }
 		.modal .field input, .modal .field select, .modal .field textarea { width: 100%; }
 		.modal .field textarea { min-height: 56px; resize: vertical; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; outline: none; }
 		.modal .field textarea:focus { border-color: var(--accent); }
-		.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+		.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; flex-wrap: wrap; }
+
+		/* 项目计划 */
+		.step-list { list-style: none; margin: 4px 0 10px; }
+		.step-item {
+			display: flex; align-items: flex-start; gap: 8px;
+			padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px;
+			margin-bottom: 6px; font-size: 12px; line-height: 1.45;
+		}
+		.step-item .s-no { font-family: var(--mono); color: var(--accent); font-size: 11px; padding-top: 1px; }
+		.step-item .s-text { flex: 1; }
+		.step-item .s-check { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--dim); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; color: transparent; font-size: 10px; background: transparent; }
+		.step-item.done .s-check { background: var(--green); border-color: var(--green); color: #fff; }
+		.step-item.done .s-text { text-decoration: line-through; color: var(--faint); }
 	</style>
 </head>
 <body>
@@ -279,9 +361,10 @@
 		<div class="logo">EE</div>
 		<div class="title">EE Workbench</div>
 		<span class="badge" id="envBadge">EDA</span>
-		<button class="close" id="closeBtn" title="关闭">✕</button>
+		<button class="icon-btn" id="themeBtn" title="切换主题">🌙</button>
+		<button class="icon-btn" id="closeBtn" title="关闭">✕</button>
 	</div>
-	<div class="preview-banner" id="previewBanner">预览模式：未检测到 EDA 环境，数据仅保存在浏览器本地。</div>
+	<div class="preview-banner" id="previewBanner">预览模式：未检测到 EDA 环境，数据仅保存在浏览器本地；开源广场搜索将打开浏览器新标签页。</div>
 
 	<div class="tabs">
 		<button class="tab active" data-tab="pomo">番茄钟</button>
@@ -347,6 +430,40 @@
 			<h2>Build-Your-Own-X</h2>
 			<button class="btn primary small" id="byoxAdd">＋ 新建项目</button>
 		</div>
+
+		<!-- 开源广场搜索 -->
+		<div class="card" style="padding: 12px;">
+			<div class="ask-label">🔍 开源广场搜索</div>
+			<div class="search-row">
+				<input class="input grow" id="oshSearch" placeholder="搜索嘉立创开源广场，例如：logic analyzer" maxlength="100" />
+				<button class="btn blue" id="oshSearchBtn">搜索</button>
+			</div>
+			<div class="search-hint">在浏览器打开 <b>oshwhub.com</b> 搜索开源项目，参考他人设计思路。需要 EDA 内已开启「外部交互」或浏览器可用。</div>
+		</div>
+
+		<!-- 问询 -->
+		<div class="ask-card">
+			<div class="ask-label">💡 想做什么？<span>问问我</span></div>
+			<div class="ask-row">
+				<input class="input grow" id="askInput" placeholder="例如：我想做一个桌面电源 / 逻辑分析仪 / ESP32 开发板…" maxlength="120" />
+				<button class="btn primary" id="askBtn">推荐项目</button>
+			</div>
+			<div class="ask-hint">告诉我你想做的东西，我会从灵感库匹配项目并给你拆解步骤；也可以直接浏览下方灵感库。</div>
+			<div id="askResult"></div>
+		</div>
+
+		<!-- 灵感库 -->
+		<div class="section-title">
+			<h2>🧠 灵感库</h2>
+		</div>
+		<div class="filter-row" id="ideaFilters"></div>
+		<div class="idea-grid" id="ideaList"></div>
+		<div style="height: 4px;"></div>
+
+		<!-- 我的项目 -->
+		<div class="section-title">
+			<h2>📁 我的项目</h2>
+		</div>
 		<div class="stat-row">
 			<div class="stat"><div class="n" id="byoxTotal">0</div><div class="l">全部</div></div>
 			<div class="stat"><div class="n" id="byoxBuilding">0</div><div class="l">进行中</div></div>
@@ -377,6 +494,9 @@
 				<option value="medium" selected>中优先级</option>
 				<option value="low">低优先级</option>
 			</select>
+			<select class="select" id="todoProj">
+				<option value="">不关联项目</option>
+			</select>
 		</div>
 		<div class="filter-row" id="todoFilters"></div>
 		<div id="todoList"></div>
@@ -386,10 +506,11 @@
 		</div>
 	</section>
 
-	<!-- ===================== BYOX 表单弹层 ===================== -->
+	<!-- ===================== 新建/编辑项目弹层 ===================== -->
 	<div class="modal-mask" id="byoxModal">
 		<div class="modal">
 			<h3 id="byoxModalTitle">新建项目</h3>
+			<div class="modal-sub" id="byoxModalSub">记录你自己的 DIY 项目；也可以从灵感库「开始」一个项目自动生成计划。</div>
 			<div class="field">
 				<label>项目名称 *</label>
 				<input class="input" id="byoxName" placeholder="例如：Build your own logic analyzer" maxlength="80" />
@@ -400,7 +521,7 @@
 			</div>
 			<div class="field">
 				<label>参考资料链接</label>
-				<input class="input" id="byoxRef" placeholder="https://…（数据手册 / 教程 / 仓库）" maxlength="300" />
+				<input class="input" id="byoxRef" placeholder="https://…（数据手册 / 教程 / 训练营课程）" maxlength="300" />
 			</div>
 			<div class="row">
 				<div class="field grow">
@@ -424,6 +545,30 @@
 			<div class="modal-actions">
 				<button class="btn" id="byoxCancel">取消</button>
 				<button class="btn primary" id="byoxSave">保存</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- ===================== 项目计划弹层 ===================== -->
+	<div class="modal-mask" id="planModal">
+		<div class="modal">
+			<h3 id="planTitle">项目计划</h3>
+			<div class="modal-sub" id="planSub"></div>
+			<div class="field">
+				<label>目标</label>
+				<div class="hint" id="planGoal" style="line-height:1.5;"></div>
+			</div>
+			<div class="field">
+				<label>实施步骤（勾选完成会自动更新项目进度）</label>
+				<ul class="step-list" id="planSteps"></ul>
+			</div>
+			<div class="field" id="planRefWrap" style="display:none;">
+				<label>参考资料</label>
+				<div id="planRefs"></div>
+			</div>
+			<div class="modal-actions">
+				<button class="btn" id="planClose">关闭</button>
+				<button class="btn green" id="planToTodo">将未完成步骤加入待办</button>
 			</div>
 		</div>
 	</div>
@@ -520,6 +665,29 @@
 			const p = n => String(n).padStart(2, '0');
 			return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
 		}
+		function openExternal(url) {
+			if (hasEda) {
+				try {
+					eda.sys_Window.open(url, '_blank');
+					return;
+				} catch { /* fall through */ }
+			}
+			try {
+				window.open(url, '_blank', 'noopener,noreferrer');
+			} catch { /* noop */ }
+		}
+
+		/* ================= 主题 ================= */
+		function applyTheme(t) {
+			document.documentElement.setAttribute('data-theme', t);
+			document.getElementById('themeBtn').textContent = t === 'dark' ? '🌙' : '☀️';
+		}
+		document.getElementById('themeBtn').addEventListener('click', async () => {
+			const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+			const next = cur === 'dark' ? 'light' : 'dark';
+			applyTheme(next);
+			await storage.set('theme', next);
+		});
 
 		/* ================= 标签页切换 ================= */
 		const tabs = document.querySelectorAll('.tab');
@@ -580,7 +748,6 @@
 			const raw = await storage.get('pomodoro');
 			if (raw && raw.mode && raw.settings) {
 				pomo = Object.assign(pomoDefaults(), raw, { settings: Object.assign({}, DEFAULT_SETTINGS, raw.settings) });
-				// 跨会话恢复：运行中的计时按 endAt 继续
 				if (pomo.status === 'running' && pomo.endAt && pomo.endAt <= Date.now()) {
 					completePomoPhase();
 				}
@@ -588,7 +755,6 @@
 			else {
 				pomo = pomoDefaults();
 			}
-			// 设置输入框与已保存配置同步
 			document.getElementById('setFocus').value = pomo.settings.focusMin;
 			document.getElementById('setShort').value = pomo.settings.shortBreakMin;
 			document.getElementById('setLong').value = pomo.settings.longBreakMin;
@@ -640,9 +806,7 @@
 		}
 
 		async function completePomoPhase() {
-			const finished = Object.assign({}, pomo);
 			const wasFocus = pomo.mode === MODE.FOCUS;
-			// 推进状态机
 			if (wasFocus) {
 				const completed = pomo.completedFocus + 1;
 				const isLong = completed % (pomo.settings.rounds || 4) === 0;
@@ -749,12 +913,190 @@
 		document.getElementById('setRounds').addEventListener('change', applySettings);
 		document.getElementById('setAuto').addEventListener('change', applySettings);
 
-		/* ================= BYOX ================= */
+		/* ================= 灵感库 ================= */
+		const BOOTCAMP_URL = 'https://wiki.lceda.cn/zh-hans/bootcamp/';
+		const GEN_STEPS = {
+			research: '调研参考设计：阅读相关教程、数据手册与开源项目，明确功能指标',
+			sch: '设计原理图：选型主控与关键器件，搭建电源、时钟、复位与接口电路',
+			review: '原理图审查：核对网络标签、封装引脚、去耦电容与上拉电阻',
+			pcb: 'PCB 布局布线：按电源/高速/模拟分区布局，优化走线与地平面',
+			fab: '打样与焊接：提交制板文件（Gerber/BOM），焊接并检查短路虚焊',
+			debug: '上电调试：分级上电、测量关键节点电压波形，定位并修复问题',
+			verify: '功能验证：对照目标逐项测试，整理测试记录与改进方向',
+		};
+
+		const IDEA_LIB = [
+			{ id: 'logic-analyzer', title: 'Build your own Logic Analyzer', cat: '测量', diff: '中', src: 'classic', desc: '8/16 通道逻辑分析仪，24MHz+ 采样，抓取 UART/SPI/I2C 时序，调试协议必备。', steps: ['调研采样方案：MCU/FPGA + USB 桥接，确定通道数与采样率', '设计输入保护（钳位 + 分压）与触发电路', '画原理图并布局 PCB（等长走线、去耦）', '打样焊接，编写固件（采样 + 上传协议）', '编写上位机（波形显示/协议解码）或复用 PulseView', '用真实信号（UART/SPI）验证并校准'] },
+			{ id: 'bench-psu', title: 'Build your own Bench Power Supply', cat: '电源', diff: '中', src: 'classic', desc: '0-30V/0-3A 可调线性电源，数码显示，带限流保护——工作台核心仪器。', steps: ['确定指标（电压/电流范围、纹波、保护）', '选型：变压器/开关电源模块 + 线性稳压（如 LM317 扩流或 DC-DC 后级）', '设计恒压恒流环路（运放 + 采样电阻）与显示电路', '原理图 → PCB（功率散热与热设计）', '打样焊接，空载/满载测试，校准显示与保护点'] },
+			{ id: 'o-scope', title: 'Build your own Oscilloscope', cat: '测量', diff: '难', src: 'classic', desc: '入门级数字示波器：模拟前端 + ADC + FPGA/STM32 显示，学习信号链的极佳项目。', steps: ['调研架构：前端放大衰减 + ADC + 触发 + 显示', '设计模拟前端（带宽、阻抗、保护）与 ADC 电路', 'FPGA/MCU 采集与触发逻辑，DMA 传输', '原理图 → PCB（阻抗匹配、模拟/数字分区）', '固件 + 上位机显示，用信号发生器校准'] },
+			{ id: 'debug-probe', title: 'Build your own Debug Probe', cat: '学习板', diff: '易', src: 'classic', desc: 'SWD 下载调试器（ST-Link 类），理解调试协议，也能省下一笔工具钱。', steps: ['调研目标调试协议（SWD/JTAG）与参考固件', '选型主控（STM32F103 等）与电平转换', '画原理图与 PCB（USB 接口、ESD 保护）', '打样焊接，烧录 DAPLink/OpenOCD 固件', '连接目标板验证下载与断点调试'] },
+			{ id: 'dev-board', title: 'Build your own Dev Board', cat: '学习板', diff: '易', src: 'classic', desc: 'STM32/ESP32 最小系统 + LED/按键/排针，作为你自己的开发板起点。', steps: ['选主控：确定封装、引脚与启动配置（BOOT）', '设计最小系统：电源、晶振、复位、SWD 接口', '加上常用外设：LED、按键、USB、排针扩展', '原理图 → PCB → 打样焊接', '烧录点亮第一个 LED，跑通串口打印'] },
+			{ id: 'sensor-node', title: 'Build your own Sensor Node', cat: '传感', diff: '易', src: 'classic', desc: '温湿度/气压/光照采集 + 无线（WiFi/LoRa）上报，物联网入门。', steps: ['确定传感器与无线方案（ESP32/LoRa/NB-IoT）', '选型传感器（SHT30/BMP280 等）与供电（电池/低功耗）', '画原理图与 PCB，注意天线区域净空', '打样焊接，编写采集与上报固件', '组网验证：数据上云/显示，做低功耗优化'] },
+			{ id: 'usb-hub', title: 'Build your own USB Hub', cat: '通信', diff: '中', src: 'classic', desc: '4 口 USB2.0 Hub（或升级 3.0），理解 USB 拓扑与供电管理。', steps: ['调研 Hub 芯片（如 GL850G/FE1.1s）与电源方案', '设计原理图：差分对、过流保护、指示灯', 'PCB 布线：USB 差分 90Ω 阻抗、供电铺铜', '打样焊接，连接设备验证枚举与供电'] },
+			{ id: 'bt-speaker', title: 'Build your own Bluetooth Speaker', cat: '音频', diff: '中', src: 'classic', desc: '蓝牙音频模块 + DAC + 功放 + 锂电池管理，声学与电源兼顾。', steps: ['选蓝牙音频模块（AC6925/AC6965 等）与喇叭', '设计电源：锂电池 + 充电管理（TP4056）', '音频链路：DAC → 功放（PAM8403 等）→ 喇叭', '原理图 → PCB（音频地处理、防爆音）', '焊接装机，测试音质与续航'] },
+
+			{ id: 'oscilloscope', title: '训练营 · 示波器项目', cat: '测量', diff: '中', src: 'bootcamp', url: BOOTCAMP_URL + 'oscilloscope', desc: '嘉立创训练营实战：从零设计一台入门示波器，配套完整教程。', steps: [GEN_STEPS.research, '跟随训练营课程完成电路方案与关键器件选型', GEN_STEPS.sch, GEN_STEPS.pcb, '打样焊接并跟随课程调试', '完成训练营考核项，整理学习笔记'] },
+			{ id: 'esp32-clock', title: '训练营 · ESP32 时钟', cat: '学习板', diff: '易', src: 'bootcamp', url: BOOTCAMP_URL + 'esp32-clock', desc: 'ESP32 驱动的桌面时钟/天气站，WiFi 校时，训练营完整教学。', steps: [GEN_STEPS.research, '跟随课程完成 ESP32 最小系统与显示方案', GEN_STEPS.sch, GEN_STEPS.pcb, '焊接并联网校时调试', '完成训练营考核项'] },
+			{ id: 'hygrothermograph', title: '训练营 · 温湿度计', cat: '传感', diff: '易', src: 'bootcamp', url: BOOTCAMP_URL + 'hygrothermograph', desc: '传感器 + 显示屏的桌面温湿度计，训练营手把手教学。', steps: [GEN_STEPS.research, '选型温湿度传感器与显示方案', GEN_STEPS.sch, GEN_STEPS.pcb, '焊接与数据校准', '完成训练营考核项'] },
+			{ id: 'usbhub', title: '训练营 · USB Hub', cat: '通信', diff: '中', src: 'bootcamp', url: BOOTCAMP_URL + 'usbhub', desc: 'USB Hub 设计与制作，训练营完整流程教学。', steps: ['跟随课程了解 USB 规范与 Hub 方案', GEN_STEPS.sch, GEN_STEPS.pcb, '打样焊接并验证枚举', '完成训练营考核项'] },
+			{ id: 'tuya-lights', title: '训练营 · 涂鸦智能灯', cat: '物联网', diff: '易', src: 'bootcamp', url: BOOTCAMP_URL + 'tuya-lights', desc: '涂鸦方案智能灯，手机 App 控制，训练营课程。', steps: [GEN_STEPS.research, '熟悉涂鸦模组接入与 App 配置', GEN_STEPS.sch, GEN_STEPS.pcb, '焊接并配网调试', '完成训练营考核项'] },
+			{ id: 'tuya-sensor', title: '训练营 · 涂鸦传感器', cat: '物联网', diff: '易', src: 'bootcamp', url: BOOTCAMP_URL + 'tuya-sensor', desc: '涂鸦方案的传感器节点，数据上云，训练营课程。', steps: [GEN_STEPS.research, '选型传感器与涂鸦模组', GEN_STEPS.sch, GEN_STEPS.pcb, '焊接并验证上报链路', '完成训练营考核项'] },
+			{ id: 'iotsocket', title: '训练营 · IoT 智能插座', cat: '物联网', diff: '中', src: 'bootcamp', url: BOOTCAMP_URL + 'iotsocket', desc: '可远程控制的智能插座，注意强电安全设计，训练营课程。', steps: ['了解强电安全规范与隔离要求（重点！）', '选型继电器/可控硅与计量方案', GEN_STEPS.sch, GEN_STEPS.pcb, '焊接并做负载测试', '完成训练营考核项'] },
+			{ id: 'renesas-clock', title: '训练营 · 瑞萨时钟', cat: '学习板', diff: '易', src: 'bootcamp', url: BOOTCAMP_URL + 'renesas-clock', desc: '瑞萨 MCU 时钟项目，训练营课程。', steps: [GEN_STEPS.research, '了解瑞萨 MCU 开发环境', GEN_STEPS.sch, GEN_STEPS.pcb, '焊接与调试', '完成训练营考核项'] },
+			{ id: 'renesas-light', title: '训练营 · 瑞萨调光灯', cat: '学习板', diff: '易', src: 'bootcamp', url: BOOTCAMP_URL + 'renesas-light', desc: '瑞萨 MCU 调光项目，训练营课程。', steps: [GEN_STEPS.research, '了解 PWM 调光原理与瑞萨外设', GEN_STEPS.sch, GEN_STEPS.pcb, '焊接与调试', '完成训练营考核项'] },
+			{ id: 'n32-ammeter', title: '训练营 · N32 电流表', cat: '测量', diff: '中', src: 'bootcamp', url: BOOTCAMP_URL + 'n32-ammeter', desc: 'N32 MCU 电流表项目，训练营课程。', steps: [GEN_STEPS.research, '了解电流采样方案（采样电阻 + 运放）', GEN_STEPS.sch, GEN_STEPS.pcb, '焊接并校准精度', '完成训练营考核项'] },
+			{ id: 'cw32-motor', title: '训练营 · CW32 电机驱动', cat: '学习板', diff: '中', src: 'bootcamp', url: BOOTCAMP_URL + 'cw32-motor', desc: 'CW32 MCU 电机驱动项目，训练营课程。', steps: [GEN_STEPS.research, '了解电机驱动原理（H 桥/PWM）', GEN_STEPS.sch, GEN_STEPS.pcb, '焊接并驱动电机验证', '完成训练营考核项'] },
+			{ id: 'chipintelli-voice', title: '训练营 · 语音识别模块', cat: '音频', diff: '中', src: 'bootcamp', url: BOOTCAMP_URL + 'chipintelli-voice', desc: '启英泰伦离线语音识别方案，训练营课程。', steps: [GEN_STEPS.research, '了解语音模组接入与命令词配置', GEN_STEPS.sch, GEN_STEPS.pcb, '焊接并做语音唤醒测试', '完成训练营考核项'] },
+			{ id: 'eda-robot', title: '训练营 · EDA 机器人', cat: '机器人', diff: '中', src: 'bootcamp', url: BOOTCAMP_URL + 'eda-robot', desc: '嘉立创 EDA 机器人项目，训练营课程。', steps: [GEN_STEPS.research, '了解机器人结构与驱动方案', GEN_STEPS.sch, GEN_STEPS.pcb, '焊接并组装调试', '完成训练营考核项'] },
+			{ id: 'itcast-robot', title: '训练营 · 传智机器人', cat: '机器人', diff: '中', src: 'bootcamp', url: BOOTCAMP_URL + 'itcast-robot', desc: '传智播客联名机器人项目，训练营课程。', steps: [GEN_STEPS.research, '了解机器人方案', GEN_STEPS.sch, GEN_STEPS.pcb, '焊接并组装调试', '完成训练营考核项'] },
+			{ id: 'itcast-wifi', title: '训练营 · 传智 WiFi 开发板', cat: '学习板', diff: '易', src: 'bootcamp', url: BOOTCAMP_URL + 'itcast-wifi', desc: 'WiFi 开发板实战，训练营课程。', steps: [GEN_STEPS.research, '熟悉 WiFi 模组与开发环境', GEN_STEPS.sch, GEN_STEPS.pcb, '焊接并联网调试', '完成训练营考核项'] },
+			{ id: 'hk-board', title: '训练营 · HK 开发板', cat: '学习板', diff: '易', src: 'bootcamp', url: BOOTCAMP_URL + 'hk-board', desc: 'HK 系列开发板项目，训练营课程。', steps: [GEN_STEPS.research, '熟悉主控与板载外设', GEN_STEPS.sch, GEN_STEPS.pcb, '焊接并跑通例程', '完成训练营考核项'] },
+			{ id: 'instrument-tools', title: '训练营 · 仪表工具包', cat: '测量', diff: '中', src: 'bootcamp', url: BOOTCAMP_URL + 'instrument-tools', desc: '常用仪表工具制作合集，训练营课程。', steps: [GEN_STEPS.research, '选择目标仪表并了解方案', GEN_STEPS.sch, GEN_STEPS.pcb, '焊接并校准', '完成训练营考核项'] },
+		];
+
+		const IDEA_CATS = ['全部', '测量', '电源', '通信', '传感', '学习板', '音频', '物联网', '机器人'];
+		let ideaFilter = '全部';
+
+		function renderIdeaFilters() {
+			const wrap = document.getElementById('ideaFilters');
+			wrap.innerHTML = '';
+			IDEA_CATS.forEach(c => {
+				const b = document.createElement('button');
+				b.className = 'fchip' + (ideaFilter === c ? ' active' : '');
+				b.textContent = c;
+				b.addEventListener('click', () => { ideaFilter = c; renderIdeaFilters(); renderIdeaList(); });
+				wrap.appendChild(b);
+			});
+		}
+		function renderIdeaList() {
+			const list = document.getElementById('ideaList');
+			list.innerHTML = '';
+			const filtered = ideaFilter === '全部' ? IDEA_LIB : IDEA_LIB.filter(x => x.cat === ideaFilter);
+			filtered.forEach(idea => list.appendChild(renderIdeaCard(idea)));
+		}
+		function renderIdeaCard(idea) {
+			const card = document.createElement('div');
+			card.className = 'idea-card';
+			const title = document.createElement('div');
+			title.className = 'i-title';
+			title.textContent = idea.title;
+			card.appendChild(title);
+			const meta = document.createElement('div');
+			meta.className = 'i-meta';
+			const src = document.createElement('span');
+			src.className = 'src-tag ' + idea.src;
+			src.textContent = idea.src === 'bootcamp' ? '训练营' : '经典 DIY';
+			meta.appendChild(src);
+			const diff = document.createElement('span');
+			diff.className = 'diff';
+			diff.textContent = '难度 ' + idea.diff + ' · ' + idea.cat;
+			meta.appendChild(diff);
+			card.appendChild(meta);
+			const desc = document.createElement('div');
+			desc.className = 'i-desc';
+			desc.textContent = idea.desc;
+			card.appendChild(desc);
+			const actions = document.createElement('div');
+			actions.className = 'i-actions';
+			const start = document.createElement('button');
+			start.className = 'btn primary small';
+			start.textContent = '开始';
+			start.addEventListener('click', () => startFromIdea(idea));
+			actions.appendChild(start);
+			if (idea.url) {
+				const link = document.createElement('button');
+				link.className = 'btn small';
+				link.textContent = '教程';
+				link.addEventListener('click', () => openExternal(idea.url));
+				actions.appendChild(link);
+			}
+			card.appendChild(actions);
+			return card;
+		}
+
+		function matchIdea(input) {
+			const q = input.toLowerCase();
+			if (!q) return null;
+			// 分类关键词
+			const catMap = { '电源': ['电源', 'power', 'psu', '供电'], '测量': ['示波', 'oscilloscope', '逻辑', 'logic', '测量', '电流', 'ammeter', 'meter'], '通信': ['usb', 'hub', '通信', 'wifi', '蓝牙', 'bluetooth'], '传感': ['传感', 'sensor', '温湿', '温度'], '音频': ['音频', '音箱', 'speaker', '语音', 'voice', 'audio'], '物联网': ['iot', '物联网', '插座', 'sensor node', '智能'], '机器人': ['机器人', 'robot'], '学习板': ['开发板', 'dev', 'esp32', 'stm32', 'clock', '时钟', '学习'] };
+			for (const [cat, keys] of Object.entries(catMap)) {
+				if (keys.some(k => q.includes(k))) {
+					const pool = IDEA_LIB.filter(x => x.cat === cat);
+					if (pool.length) return pool[0];
+				}
+			}
+			// 标题/描述关键词
+			let best = null, bestScore = 0;
+			IDEA_LIB.forEach(idea => {
+				const hay = (idea.title + ' ' + idea.desc + ' ' + idea.cat).toLowerCase();
+				let score = 0;
+				q.split(/[\s,，。]+/).filter(Boolean).forEach(w => { if (hay.includes(w)) score += w.length; });
+				if (score > bestScore) { bestScore = score; best = idea; }
+			});
+			return bestScore > 0 ? best : null;
+		}
+
+		function showAskResult(idea) {
+			const wrap = document.getElementById('askResult');
+			wrap.innerHTML = '';
+			if (!idea) {
+				wrap.innerHTML = '<div class="hint" style="margin-top:10px;">没有匹配到灵感库项目。试试去开源广场搜索，或在下方灵感库挑选一个项目。</div>';
+				return;
+			}
+			const card = document.createElement('div');
+			card.className = 'match-card';
+			const t = document.createElement('div');
+			t.className = 'm-title';
+			t.textContent = idea.title;
+			card.appendChild(t);
+			const meta = document.createElement('div');
+			meta.className = 'm-meta';
+			meta.textContent = (idea.src === 'bootcamp' ? '嘉立创训练营' : '经典 DIY') + ' · 难度 ' + idea.diff + ' · ' + idea.cat;
+			card.appendChild(meta);
+			const d = document.createElement('div');
+			d.className = 'm-desc';
+			d.textContent = idea.desc;
+			card.appendChild(d);
+			const actions = document.createElement('div');
+			actions.className = 'm-actions';
+			const start = document.createElement('button');
+			start.className = 'btn primary small';
+			start.textContent = '开始这个项目';
+			start.addEventListener('click', () => startFromIdea(idea));
+			actions.appendChild(start);
+			if (idea.url) {
+				const link = document.createElement('button');
+				link.className = 'btn small';
+				link.textContent = '查看教程';
+				link.addEventListener('click', () => openExternal(idea.url));
+				actions.appendChild(link);
+			}
+			card.appendChild(actions);
+			wrap.appendChild(card);
+		}
+
+		document.getElementById('askBtn').addEventListener('click', () => {
+			showAskResult(matchIdea(document.getElementById('askInput').value));
+		});
+		document.getElementById('askInput').addEventListener('keydown', e => {
+			if (e.key === 'Enter') showAskResult(matchIdea(e.target.value));
+		});
+		document.getElementById('oshSearchBtn').addEventListener('click', () => {
+			const kw = document.getElementById('oshSearch').value.trim();
+			if (!kw) { toast('请输入搜索关键词', 'warn', 2); return; }
+			openExternal('https://oshwhub.com/search?keyword=' + encodeURIComponent(kw));
+		});
+		document.getElementById('oshSearch').addEventListener('keydown', e => {
+			if (e.key === 'Enter') document.getElementById('oshSearchBtn').click();
+		});
+
+		/* ================= BYOX 项目 ================= */
 		const PROJECT_STATUSES = ['idea', 'building', 'paused', 'done'];
 		const STATUS_LABELS = { idea: '想法', building: '进行中', paused: '暂停', done: '完成' };
 		let projects = [];
 		let byoxFilter = 'all';
 		let editingProjectId = null;
+		let planProjectId = null;
 
 		async function loadProjects() {
 			const raw = await storage.get('projects');
@@ -764,6 +1106,35 @@
 		async function saveProjects() {
 			await storage.set('projects', projects);
 			renderByox();
+			refreshTodoProjSelect();
+		}
+
+		function startFromIdea(idea) {
+			const existing = projects.find(p => p.name === idea.title);
+			if (existing) {
+				toast('该项目已在列表中', 'info', 2);
+				openPlanModal(existing);
+				return;
+			}
+			const proj = {
+				id: uid('proj'),
+				name: idea.title,
+				goal: idea.desc,
+				reference: idea.url || '',
+				status: 'building',
+				progress: 0,
+				tags: [idea.cat, idea.diff],
+				steps: (idea.steps || []).map(s => ({ text: s, done: false })),
+				source: idea.src,
+				sourceUrl: idea.url || '',
+				createdAt: Date.now(),
+				updatedAt: Date.now(),
+			};
+			projects.unshift(proj);
+			saveProjects().then(() => {
+				toast('已创建项目计划', 'success', 2);
+				openPlanModal(proj);
+			});
 		}
 
 		function renderByox() {
@@ -779,7 +1150,6 @@
 			document.getElementById('byoxDone').textContent = stats.done;
 			document.getElementById('byoxIdea').textContent = stats.idea;
 
-			// 过滤器
 			const filters = document.getElementById('byoxFilters');
 			filters.innerHTML = '';
 			['all', ...PROJECT_STATUSES].forEach(st => {
@@ -797,7 +1167,7 @@
 				const empty = document.createElement('div');
 				empty.className = 'empty';
 				empty.innerHTML = projects.length === 0
-					? '还没有项目。<br/>点右上角「＋ 新建项目」，<br/>记录你的第一个 build-your-own-x 想法。'
+					? '还没有项目。<br/>从上方灵感库「开始」一个，<br/>或者告诉我你想做什么。<br/><br/>自己的项目也可以点「＋ 新建项目」记录。'
 					: '该状态下暂无项目。';
 				list.appendChild(empty);
 				return;
@@ -867,6 +1237,10 @@
 
 			const actions = document.createElement('div');
 			actions.className = 'proj-actions';
+			const plan = document.createElement('button');
+			plan.className = 'btn small';
+			plan.textContent = '计划';
+			plan.addEventListener('click', () => openPlanModal(p));
 			const edit = document.createElement('button');
 			edit.className = 'btn small';
 			edit.textContent = '编辑';
@@ -880,15 +1254,115 @@
 					await saveProjects();
 				});
 			});
+			actions.appendChild(plan);
 			actions.appendChild(edit);
 			actions.appendChild(del);
 			card.appendChild(actions);
 			return card;
 		}
 
+		/* ---------- 项目计划弹层 ---------- */
+		function openPlanModal(p) {
+			planProjectId = p.id;
+			document.getElementById('planTitle').textContent = p.name;
+			document.getElementById('planSub').textContent = (p.source === 'bootcamp' ? '来源：嘉立创训练营' : p.source === 'classic' ? '来源：经典 DIY 灵感库' : '来源：自定义项目') + ' · 状态：' + (STATUS_LABELS[p.status] || '想法');
+			document.getElementById('planGoal').textContent = p.goal || '（未填写目标）';
+			const steps = document.getElementById('planSteps');
+			steps.innerHTML = '';
+			const list = Array.isArray(p.steps) ? p.steps : [];
+			if (list.length === 0) {
+				const li = document.createElement('li');
+				li.className = 'step-item';
+				li.innerHTML = '<span class="s-text">该项目还没有步骤计划。可以在灵感库中重新「开始」一个带步骤的项目。</span>';
+				steps.appendChild(li);
+			}
+			list.forEach((s, i) => {
+				const li = document.createElement('li');
+				li.className = 'step-item' + (s.done ? ' done' : '');
+				const chk = document.createElement('button');
+				chk.className = 's-check';
+				chk.textContent = '✓';
+				chk.title = '勾选/取消';
+				chk.addEventListener('click', async () => {
+					const proj = projects.find(x => x.id === p.id);
+					if (!proj) return;
+					proj.steps[i].done = !proj.steps[i].done;
+					const doneCount = proj.steps.filter(x => x.done).length;
+					proj.progress = proj.steps.length ? Math.round(doneCount / proj.steps.length * 100) : proj.progress;
+					proj.updatedAt = Date.now();
+					await saveProjects();
+					openPlanModal(proj);
+				});
+				li.appendChild(chk);
+				const no = document.createElement('span');
+				no.className = 's-no';
+				no.textContent = (i + 1) + '.';
+				li.appendChild(no);
+				const txt = document.createElement('span');
+				txt.className = 's-text';
+				txt.textContent = s.text;
+				li.appendChild(txt);
+				steps.appendChild(li);
+			});
+			const refWrap = document.getElementById('planRefWrap');
+			const refs = document.getElementById('planRefs');
+			if (p.reference || p.sourceUrl) {
+				refWrap.style.display = 'block';
+				refs.innerHTML = '';
+				const urls = [p.reference, p.sourceUrl].filter(Boolean);
+				urls.forEach(u => {
+					const a = document.createElement('a');
+					a.className = 'proj-ref';
+					a.href = /^https?:\/\//i.test(u) ? u : 'https://' + u;
+					a.target = '_blank';
+					a.rel = 'noopener noreferrer';
+					a.textContent = '🔗 ' + u;
+					refs.appendChild(a);
+				});
+			}
+			else {
+				refWrap.style.display = 'none';
+			}
+			document.getElementById('planModal').classList.add('show');
+		}
+		function closePlanModal() {
+			document.getElementById('planModal').classList.remove('show');
+			planProjectId = null;
+		}
+		document.getElementById('planClose').addEventListener('click', closePlanModal);
+		document.getElementById('planModal').addEventListener('click', e => {
+			if (e.target === e.currentTarget) closePlanModal();
+		});
+		document.getElementById('planToTodo').addEventListener('click', async () => {
+			const proj = projects.find(x => x.id === planProjectId);
+			if (!proj || !Array.isArray(proj.steps)) return;
+			const pending = proj.steps.map((s, i) => ({ s, i })).filter(x => !x.s.done);
+			if (pending.length === 0) {
+				toast('所有步骤都已完成，无需加入待办', 'info', 2);
+				return;
+			}
+			pending.forEach(({ s, i }) => {
+				todos.unshift({
+					id: uid('todo'),
+					text: '【' + proj.name + '】步骤' + (i + 1) + '：' + s.text,
+					done: false,
+					priority: 'medium',
+					category: '其他',
+					project: proj.name,
+					createdAt: Date.now(),
+					completedAt: null,
+					source: 'project',
+				});
+			});
+			await saveTodos();
+			toast('已加入 ' + pending.length + ' 条待办', 'success', 3);
+		});
+
+		/* ---------- 新建/编辑项目表单 ---------- */
 		function openByoxModal(p) {
 			editingProjectId = p ? p.id : null;
 			document.getElementById('byoxModalTitle').textContent = p ? '编辑项目' : '新建项目';
+			document.getElementById('byoxModalSub').textContent = p ? '' : '记录你自己的 DIY 项目；也可以从灵感库「开始」一个项目自动生成计划。';
 			document.getElementById('byoxName').value = p ? p.name : '';
 			document.getElementById('byoxGoal').value = p ? p.goal : '';
 			document.getElementById('byoxRef').value = p ? p.reference : '';
@@ -926,7 +1400,7 @@
 				}
 			}
 			else {
-				projects.unshift(Object.assign({ id: uid('proj'), createdAt: Date.now(), updatedAt: Date.now() }, payload));
+				projects.unshift(Object.assign({ id: uid('proj'), createdAt: Date.now(), updatedAt: Date.now(), source: 'custom', steps: [] }, payload));
 			}
 			await saveProjects();
 			closeByoxModal();
@@ -958,6 +1432,23 @@
 			renderTodos();
 		}
 
+		function refreshTodoProjSelect() {
+			const sel = document.getElementById('todoProj');
+			const cur = sel.value;
+			sel.innerHTML = '';
+			const opt = document.createElement('option');
+			opt.value = '';
+			opt.textContent = '不关联项目';
+			sel.appendChild(opt);
+			projects.forEach(p => {
+				const o = document.createElement('option');
+				o.value = p.name;
+				o.textContent = '项目 · ' + p.name;
+				sel.appendChild(o);
+			});
+			sel.value = projects.some(p => p.name === cur) ? cur : '';
+		}
+
 		function renderTodos() {
 			const open = todos.filter(t => !t.done).length;
 			const done = todos.filter(t => t.done).length;
@@ -982,7 +1473,7 @@
 				const empty = document.createElement('div');
 				empty.className = 'empty';
 				empty.textContent = todoFilter === 'open'
-					? '暂无待办。\n把调试问题、BOM 核对、封装检查记下来。'
+					? '暂无待办。\n把调试问题、BOM 核对、封装检查记下来。\n也可以从 BYOX 项目计划一键生成待办。'
 					: '这里空空如也。';
 				list.appendChild(empty);
 				return;
@@ -1016,6 +1507,12 @@
 			body.appendChild(text);
 			const sub = document.createElement('div');
 			sub.className = 'todo-sub';
+			if (t.project) {
+				const pj = document.createElement('span');
+				pj.className = 'proj-tag';
+				pj.textContent = '项目 · ' + t.project;
+				sub.appendChild(pj);
+			}
 			const cat = document.createElement('span');
 			cat.className = 'cat';
 			cat.textContent = t.category || '其他';
@@ -1057,6 +1554,7 @@
 				done: false,
 				priority: document.getElementById('todoPri').value,
 				category: document.getElementById('todoCat').value,
+				project: document.getElementById('todoProj').value || '',
 				createdAt: Date.now(),
 				completedAt: null,
 				source: '',
@@ -1079,7 +1577,11 @@
 		});
 
 		/* ================= 启动 ================= */
-		Promise.all([loadPomo(), loadProjects(), loadTodos()]).then(() => {
+		Promise.all([storage.get('theme'), loadPomo(), loadProjects(), loadTodos()]).then(([theme]) => {
+			applyTheme(theme === 'light' ? 'light' : 'dark');
+			renderIdeaFilters();
+			renderIdeaList();
+			refreshTodoProjSelect();
 			if (hasEda) {
 				try { eda.sys_Message.showToastMessage('EE Workbench 已就绪', 'info', 2); } catch { /* noop */ }
 			}
