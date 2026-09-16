@@ -354,6 +354,86 @@
 		.step-item .s-check { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--dim); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; color: transparent; font-size: 10px; background: transparent; }
 		.step-item.done .s-check { background: var(--green); border-color: var(--green); color: #fff; }
 		.step-item.done .s-text { text-decoration: line-through; color: var(--faint); }
+
+		/* ---------- 桌面玩偶（伙伴） ---------- */
+		.pet-widget {
+			position: fixed; right: 14px; bottom: 14px; z-index: 20;
+			display: flex; flex-direction: column; align-items: center;
+			cursor: pointer; user-select: none;
+		}
+		.pet-widget.hidden { display: none; }
+		.pet-bubble {
+			position: relative; max-width: 180px; min-width: 60px;
+			background: var(--panel); border: 1px solid var(--border);
+			border-radius: 10px; padding: 7px 10px;
+			font-size: 11.5px; line-height: 1.45; color: var(--text);
+			box-shadow: 0 4px 14px var(--shadow);
+			margin-bottom: 6px; opacity: 0; transform: translateY(4px);
+			transition: opacity .18s, transform .18s; text-align: center;
+		}
+		.pet-bubble.show { opacity: 1; transform: translateY(0); }
+		.pet-bubble::after {
+			content: ''; position: absolute; bottom: -5px; left: 50%;
+			margin-left: -5px; border-left: 5px solid transparent;
+			border-right: 5px solid transparent;
+			border-top: 5px solid var(--panel);
+		}
+		.pet-svg {
+			width: 92px; height: 92px; filter: drop-shadow(0 5px 10px var(--shadow));
+			animation: pet-bob 3.2s ease-in-out infinite;
+		}
+		.pet-svg.celebrate { animation: pet-hop .6s ease-in-out 2; }
+		.pet-svg.wiggle { animation: pet-wiggle .45s ease-in-out; }
+		@keyframes pet-bob {
+			0%, 100% { transform: translateY(0); }
+			50% { transform: translateY(-4px); }
+		}
+		@keyframes pet-hop {
+			0%, 100% { transform: translateY(0) scale(1); }
+			30% { transform: translateY(-16px) scale(1.06); }
+			60% { transform: translateY(0) scale(.97); }
+		}
+		@keyframes pet-wiggle {
+			0%, 100% { transform: rotate(0); }
+			25% { transform: rotate(-7deg); }
+			75% { transform: rotate(7deg); }
+		}
+		.pet-svg .pet-eye { transition: transform .08s; transform-box: fill-box; transform-origin: center; }
+		.pet-svg.blink .pet-eye { transform: scaleY(.12); }
+		.pet-svg .pet-prop { display: none; }
+		.pet-svg[data-mood="working"] .pet-prop.working { display: block; }
+		.pet-svg[data-mood="resting"] .pet-prop.resting { display: block; }
+		.pet-svg[data-mood="celebrate"] .pet-prop.celebrate { display: block; }
+		.pet-svg[data-mood="working"] .pet-face { transform: translateY(2px); }
+		.pet-svg[data-mood="working"] .pet-mouth { d: path("M 52 62 Q 60 66 68 62"); }
+		.pet-name-tag {
+			margin-top: 3px; font-size: 10px; color: var(--dim);
+			background: var(--panel); border: 1px solid var(--border);
+			border-radius: 10px; padding: 1px 8px;
+		}
+		/* 伙伴页 */
+		.pet-stage {
+			text-align: center; padding: 18px 0 10px;
+			background: var(--panel); border: 1px solid var(--border);
+			border-radius: var(--radius); margin-bottom: 12px;
+		}
+		.pet-stage .pet-svg {
+			width: 150px; height: 150px; animation: pet-bob 3.2s ease-in-out infinite;
+		}
+		.pet-stage .pet-name-big { margin-top: 8px; font-size: 13px; font-weight: 600; }
+		.pet-stage .pet-mood-line { margin-top: 3px; font-size: 11px; color: var(--dim); }
+		.pet-mood-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0; }
+		.pet-mood-cell {
+			text-align: center; padding: 8px 2px; border-radius: 8px;
+			border: 1px solid var(--border); background: var(--bg); font-size: 10.5px; color: var(--dim);
+		}
+		.pet-mood-cell .emo { font-size: 17px; display: block; margin-bottom: 3px; }
+		.pet-lines-box {
+			background: var(--bg); border: 1px solid var(--border);
+			border-radius: 8px; padding: 10px 12px; margin-top: 10px;
+			font-size: 11.5px; color: var(--dim); line-height: 1.9;
+		}
+		.pet-lines-box b { color: var(--text); }
 	</style>
 </head>
 <body>
@@ -370,6 +450,7 @@
 		<button class="tab active" data-tab="pomo">番茄钟</button>
 		<button class="tab" data-tab="byox">BYOX <span class="cnt" id="byoxCnt">0</span></button>
 		<button class="tab" data-tab="todo">待办 <span class="cnt" id="todoCnt">0</span></button>
+		<button class="tab" data-tab="pet">伙伴</button>
 	</div>
 
 	<!-- ===================== 番茄钟 ===================== -->
@@ -505,6 +586,123 @@
 			<button class="btn small" id="todoClearDone">清空已完成</button>
 		</div>
 	</section>
+
+	<!-- ===================== 伙伴（桌面玩偶） ===================== -->
+	<section class="view" id="view-pet">
+		<div class="section-title">
+			<h2>🤝 伙伴</h2>
+		</div>
+
+		<div class="pet-stage">
+			<svg class="pet-svg" id="petBig" data-mood="idle" viewBox="0 0 120 132" aria-label="桌面玩偶">
+				<g class="pet-prop celebrating"><text x="88" y="26" font-size="24">🎉</text></g>
+				<g class="pet-prop working">
+					<rect x="30" y="18" width="60" height="16" rx="8" fill="#3a4658" />
+					<rect x="38" y="12" width="44" height="10" rx="5" fill="#3a4658" />
+					<rect x="18" y="30" width="8" height="12" rx="4" fill="#ff6b4a" />
+					<rect x="94" y="30" width="8" height="12" rx="4" fill="#ff6b4a" />
+				</g>
+				<g class="pet-prop resting">
+					<rect x="84" y="78" width="22" height="18" rx="3" fill="#f0f3f7" stroke="#c9d2dd" />
+					<path d="M 86 78 Q 95 66 104 78 Z" fill="#e8edf3" stroke="#c9d2dd" />
+					<rect x="99" y="94" width="6" height="7" rx="2" fill="#c9d2dd" />
+					<path d="M 78 82 Q 84 76 90 82" fill="none" stroke="#b98b5f" stroke-width="2.5" />
+				</g>
+				<!-- 身体 -->
+				<rect x="26" y="66" width="68" height="58" rx="16" fill="#3f6f8f" />
+				<rect x="26" y="66" width="68" height="18" rx="9" fill="#355f7c" />
+				<circle cx="60" cy="74" r="6" fill="#f2c9a0" />
+				<!-- 手臂 -->
+				<path d="M 26 80 Q 14 92 18 104" stroke="#3f6f8f" stroke-width="8" stroke-linecap="round" fill="none" />
+				<path d="M 94 80 Q 106 92 102 104" stroke="#3f6f8f" stroke-width="8" stroke-linecap="round" fill="none" />
+				<!-- 腿 -->
+				<rect x="38" y="118" width="14" height="12" rx="5" fill="#2c4a5f" />
+				<rect x="68" y="118" width="14" height="12" rx="5" fill="#2c4a5f" />
+				<!-- 头 -->
+				<circle cx="60" cy="40" r="26" fill="#f2c9a0" />
+				<path d="M 34 36 Q 34 14 60 14 Q 86 14 86 36 Q 86 22 78 18 Q 66 24 60 24 Q 54 24 42 18 Q 34 22 34 36 Z" fill="#4a3b32" />
+				<!-- 脸 -->
+				<g class="pet-face">
+					<ellipse class="pet-eye" cx="50" cy="40" rx="3.6" ry="4.6" fill="#1d2530" />
+					<ellipse class="pet-eye" cx="70" cy="40" rx="3.6" ry="4.6" fill="#1d2530" />
+					<ellipse cx="44" cy="48" rx="4.5" ry="2.6" fill="#e8a98f" opacity=".7" />
+					<ellipse cx="76" cy="48" rx="4.5" ry="2.6" fill="#e8a98f" opacity=".7" />
+					<path class="pet-mouth" d="M 55 52 Q 60 56 65 52" stroke="#7a4a30" stroke-width="2.2" stroke-linecap="round" fill="none" />
+				</g>
+			</svg>
+			<div class="pet-name-big" id="petNameBig">小EE</div>
+			<div class="pet-mood-line" id="petMoodLine">戳一戳我，我会回应你</div>
+		</div>
+
+		<div class="card">
+			<div class="field" style="margin-bottom: 10px;">
+				<label>伙伴名字</label>
+				<input class="input" id="petName" maxlength="12" placeholder="小EE" />
+			</div>
+			<div class="row" style="margin-bottom: 10px;">
+				<div class="field grow">
+					<label>大小：<span id="petSizeLabel">92</span>px</label>
+					<input type="range" id="petSize" min="60" max="150" step="2" value="92" style="width:100%; accent-color: var(--accent);" />
+				</div>
+			</div>
+			<label class="check-row">
+				<input type="checkbox" id="petEnabled" checked />
+				在工作台右下角常驻显示
+			</label>
+			<div class="modal-actions">
+				<button class="btn primary" id="petSave">保存设置</button>
+				<button class="btn" id="petPoke">戳一下试试</button>
+			</div>
+		</div>
+
+		<div class="card">
+			<div class="section-title" style="margin-bottom: 6px;"><h2>玩偶会根据你的工作状态变化</h2></div>
+			<div class="pet-mood-grid">
+				<div class="pet-mood-cell"><span class="emo">🧑‍💻</span>专注时<br />戴耳机埋头画图</div>
+				<div class="pet-mood-cell"><span class="emo">☕</span>休息时<br />喝咖啡放松</div>
+				<div class="pet-mood-cell"><span class="emo">🎉</span>完成时<br />蹦跳庆祝</div>
+				<div class="pet-mood-cell"><span class="emo">😊</span>空闲时<br />漂浮待机</div>
+			</div>
+			<div class="pet-lines-box" id="petLinesBox"></div>
+		</div>
+	</section>
+
+	<!-- ===================== 常驻桌面玩偶 ===================== -->
+	<div class="pet-widget" id="petWidget">
+		<div class="pet-bubble" id="petBubble"></div>
+		<svg class="pet-svg" id="petSvg" data-mood="idle" viewBox="0 0 120 132" aria-label="小EE">
+			<g class="pet-prop celebrating"><text x="88" y="26" font-size="24">🎉</text></g>
+			<g class="pet-prop working">
+				<rect x="30" y="18" width="60" height="16" rx="8" fill="#3a4658" />
+				<rect x="38" y="12" width="44" height="10" rx="5" fill="#3a4658" />
+				<rect x="18" y="30" width="8" height="12" rx="4" fill="#ff6b4a" />
+				<rect x="94" y="30" width="8" height="12" rx="4" fill="#ff6b4a" />
+			</g>
+			<g class="pet-prop resting">
+				<rect x="84" y="78" width="22" height="18" rx="3" fill="#f0f3f7" stroke="#c9d2dd" />
+				<path d="M 86 78 Q 95 66 104 78 Z" fill="#e8edf3" stroke="#c9d2dd" />
+				<rect x="99" y="94" width="6" height="7" rx="2" fill="#c9d2dd" />
+				<path d="M 78 82 Q 84 76 90 82" fill="none" stroke="#b98b5f" stroke-width="2.5" />
+			</g>
+			<rect x="26" y="66" width="68" height="58" rx="16" fill="#3f6f8f" />
+			<rect x="26" y="66" width="68" height="18" rx="9" fill="#355f7c" />
+			<circle cx="60" cy="74" r="6" fill="#f2c9a0" />
+			<path d="M 26 80 Q 14 92 18 104" stroke="#3f6f8f" stroke-width="8" stroke-linecap="round" fill="none" />
+			<path d="M 94 80 Q 106 92 102 104" stroke="#3f6f8f" stroke-width="8" stroke-linecap="round" fill="none" />
+			<rect x="38" y="118" width="14" height="12" rx="5" fill="#2c4a5f" />
+			<rect x="68" y="118" width="14" height="12" rx="5" fill="#2c4a5f" />
+			<circle cx="60" cy="40" r="26" fill="#f2c9a0" />
+			<path d="M 34 36 Q 34 14 60 14 Q 86 14 86 36 Q 86 22 78 18 Q 66 24 60 24 Q 54 24 42 18 Q 34 22 34 36 Z" fill="#4a3b32" />
+			<g class="pet-face">
+				<ellipse class="pet-eye" cx="50" cy="40" rx="3.6" ry="4.6" fill="#1d2530" />
+				<ellipse class="pet-eye" cx="70" cy="40" rx="3.6" ry="4.6" fill="#1d2530" />
+				<ellipse cx="44" cy="48" rx="4.5" ry="2.6" fill="#e8a98f" opacity=".7" />
+				<ellipse cx="76" cy="48" rx="4.5" ry="2.6" fill="#e8a98f" opacity=".7" />
+				<path class="pet-mouth" d="M 55 52 Q 60 56 65 52" stroke="#7a4a30" stroke-width="2.2" stroke-linecap="round" fill="none" />
+			</g>
+		</svg>
+		<div class="pet-name-tag" id="petNameTag">小EE</div>
+	</div>
 
 	<!-- ===================== 新建/编辑项目弹层 ===================== -->
 	<div class="modal-mask" id="byoxModal">
@@ -826,6 +1024,7 @@
 			await savePomo();
 			renderPomo();
 			beep();
+			petCelebrate(wasFocus ? 'pomo' : undefined);
 			if (wasFocus && pomo.settings.autoStartNext) {
 				startPomo();
 			}
@@ -846,6 +1045,7 @@
 			}
 			savePomo();
 			renderPomo();
+			petSetMood(petMoodNow());
 		}
 
 		function resetPomo() {
@@ -855,6 +1055,7 @@
 			pomo.endAt = 0;
 			savePomo();
 			renderPomo();
+			petSetMood(petMoodNow());
 		}
 
 		function skipPomo() {
@@ -875,6 +1076,7 @@
 						pomo.remainingMs = pomo.durationMs;
 						savePomo();
 						renderPomo();
+						petSetMood(petMoodNow());
 					});
 					return;
 				}
@@ -883,6 +1085,7 @@
 				pomo.remainingMs = pomo.durationMs;
 				savePomo();
 				renderPomo();
+				petSetMood(petMoodNow());
 			});
 		});
 
@@ -1495,6 +1698,7 @@
 					target.done = !target.done;
 					target.completedAt = target.done ? Date.now() : null;
 					await saveTodos();
+					if (target.done) petCelebrate('todo');
 				}
 			});
 			item.appendChild(check);
@@ -1576,12 +1780,120 @@
 			});
 		});
 
+		/* ================= 桌面玩偶（伙伴） ================= */
+		const PET_LINES = {
+			working: ['专注中…别打扰我 ⚡', '这个走线有点意思', '原理图快画完了！', '电流流向这里…嗯～'],
+			resting: ['咖啡真香 ☕', '休息一下，眼睛放松会儿', '拉伸一下，继续战斗', '看看窗外吧～'],
+			idle: ['我在这儿陪着你～', '要不要开个番茄钟？', '画板子去啦！', '有什么新想法吗？'],
+			celebrate: ['太棒了！🎉', '又完成一个！', '厉害呀！', '进度 +1！'],
+			todo: ['待办清零，好耶！✅', '搞定一项，继续冲！', '小任务完成！', '清单又短了一截～'],
+		};
+		let pet = { name: '小EE', enabled: true, size: 92 };
+		let petBubbleTimer = null;
+		let petBlinkTimer = null;
+
+		async function loadPet() {
+			const raw = await storage.get('pet');
+			if (raw && typeof raw === 'object') {
+				pet = Object.assign({ name: '小EE', enabled: true, size: 92 }, raw);
+			}
+			document.getElementById('petName').value = pet.name;
+			document.getElementById('petSize').value = pet.size;
+			document.getElementById('petSizeLabel').textContent = pet.size;
+			document.getElementById('petEnabled').checked = pet.enabled;
+			petApplyAll();
+		}
+		async function savePet() {
+			await storage.set('pet', pet);
+		}
+		function petMoodNow() {
+			if (pomo && pomo.status === 'running') {
+				return pomo.mode === MODE.FOCUS ? 'working' : 'resting';
+			}
+			return 'idle';
+		}
+		function petSetMood(m) {
+			document.getElementById('petSvg').dataset.mood = m;
+			document.getElementById('petBig').dataset.mood = m;
+			const moodText = m === 'working' ? '正在专注工作…' : m === 'resting' ? '休息放松中…' : m === 'celebrate' ? '庆祝中！🎉' : '戳一戳我，我会回应你';
+			const line = document.getElementById('petMoodLine');
+			if (line) line.textContent = moodText;
+		}
+		function petSay(text, dur) {
+			const b = document.getElementById('petBubble');
+			if (!b) return;
+			b.textContent = text;
+			b.classList.add('show');
+			clearTimeout(petBubbleTimer);
+			petBubbleTimer = setTimeout(() => b.classList.remove('show'), dur || 3200);
+		}
+		function petCelebrate(kind) {
+			petSetMood('celebrate');
+			const svg = document.getElementById('petSvg');
+			svg.classList.remove('celebrate');
+			void svg.offsetWidth;
+			svg.classList.add('celebrate');
+			const pool = kind === 'todo' ? PET_LINES.todo : PET_LINES.celebrate;
+			petSay(pool[Math.floor(Math.random() * pool.length)]);
+			setTimeout(() => petSetMood(petMoodNow()), 2600);
+		}
+		function petApplyAll() {
+			petSetMood(petMoodNow());
+			document.getElementById('petWidget').classList.toggle('hidden', !pet.enabled);
+			const size = Math.max(50, Math.min(170, pet.size || 92));
+			document.getElementById('petSvg').style.width = size + 'px';
+			document.getElementById('petSvg').style.height = size + 'px';
+			document.getElementById('petNameTag').textContent = pet.name;
+			document.getElementById('petNameBig').textContent = pet.name;
+		}
+		function petPoke() {
+			const mood = petMoodNow();
+			const list = mood === 'working' ? PET_LINES.working : mood === 'resting' ? PET_LINES.resting : PET_LINES.idle;
+			petSay(list[Math.floor(Math.random() * list.length)]);
+			const svg = document.getElementById('petSvg');
+			svg.classList.remove('wiggle');
+			void svg.offsetWidth;
+			svg.classList.add('wiggle');
+		}
+		function petScheduleBlink() {
+			clearTimeout(petBlinkTimer);
+			petBlinkTimer = setTimeout(() => {
+				const svg = document.getElementById('petSvg');
+				if (svg) {
+					svg.classList.add('blink');
+					setTimeout(() => svg.classList.remove('blink'), 130);
+				}
+				petScheduleBlink();
+			}, 3200 + Math.random() * 1800);
+		}
+
+		document.getElementById('petWidget').addEventListener('click', petPoke);
+		document.getElementById('petSave').addEventListener('click', async () => {
+			pet.name = (document.getElementById('petName').value.trim() || '小EE').slice(0, 12);
+			pet.size = Number(document.getElementById('petSize').value) || 92;
+			pet.enabled = document.getElementById('petEnabled').checked;
+			await savePet();
+			petApplyAll();
+			toast('伙伴设置已保存', 'success', 2);
+			petSay('记住了，我是' + pet.name + '！');
+		});
+		document.getElementById('petPoke').addEventListener('click', petPoke);
+
+		document.getElementById('petLinesBox').innerHTML =
+			'<b>它会说：</b><br>' +
+			'🧑‍💻 专注时：' + PET_LINES.working.join(' / ') + '<br>' +
+			'☕ 休息时：' + PET_LINES.resting.join(' / ') + '<br>' +
+			'😊 空闲时：' + PET_LINES.idle.join(' / ') + '<br>' +
+			'🎉 完成时：' + PET_LINES.celebrate.join(' / ') + '<br>' +
+			'✅ 待办完成：' + PET_LINES.todo.join(' / ');
+
 		/* ================= 启动 ================= */
-		Promise.all([storage.get('theme'), loadPomo(), loadProjects(), loadTodos()]).then(([theme]) => {
+		Promise.all([storage.get('theme'), loadPomo(), loadProjects(), loadTodos(), loadPet()]).then(([theme]) => {
 			applyTheme(theme === 'light' ? 'light' : 'dark');
 			renderIdeaFilters();
 			renderIdeaList();
 			refreshTodoProjSelect();
+			petScheduleBlink();
 			if (hasEda) {
 				try { eda.sys_Message.showToastMessage('EE Workbench 已就绪', 'info', 2); } catch { /* noop */ }
 			}
