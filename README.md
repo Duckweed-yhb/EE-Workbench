@@ -20,23 +20,23 @@ EE Workbench 是一个面向硬件工程师、PCB 设计者、嵌入式开发者
 
 | 深色主题 | 浅色主题 |
 |---|---|
-| ![深色主题番茄钟](docs/screenshots/pomo-dark.png) | ![浅色主题番茄钟](docs/screenshots/pomo-light.png) |
+| ![深色主题番茄钟](images/screenshots/pomo-dark.png) | ![浅色主题番茄钟](images/screenshots/pomo-light.png) |
 
 ### build-your-own-x：灵感库与问询引导
 
-![灵感库与开源广场搜索](docs/screenshots/byox-ideas.png)
+![灵感库与开源广场搜索](images/screenshots/byox-ideas.png)
 
 输入「我想做一个 XX」，自动匹配灵感库并给出推荐：
 
-![问询式项目推荐](docs/screenshots/byox-ask.png)
+![问询式项目推荐](images/screenshots/byox-ask.png)
 
 「开始」一个项目后自动生成分步实施计划，可一键把未完成步骤加入待办：
 
-![项目计划弹层](docs/screenshots/byox-plan.png)
+![项目计划弹层](images/screenshots/byox-plan.png)
 
 ### 待办清单（支持关联项目）
 
-![待办关联项目标签](docs/screenshots/todo-project.png)
+![待办关联项目标签](images/screenshots/todo-project.png)
 
 ## 功能介绍
 
