@@ -108,6 +108,14 @@ EE Workbench 是一个面向硬件工程师、PCB 设计者、嵌入式开发者
 - 偏好自动保存，下次打开工作台自动恢复
 - 深色 / 浅色主题下都能正常显示
 
+工作台右下角的玩偶与四种状态：
+
+![桌面玩偶四种状态](images/screenshots/pet-moods.png)
+
+工作台预览（右下角常驻玩偶）：
+
+![工作台预览](images/screenshots/pet-preview.png)
+
 ### EDA 集成
 
 在原理图 / PCB 环境中，菜单提供「统计当前原理图并记入待办」「统计当前 PCB 并记入待办」：
