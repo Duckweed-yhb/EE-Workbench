@@ -476,6 +476,16 @@
 			border-radius: 10px; padding: 1px 8px; transition: border-color .2s, color .2s;
 		}
 		.pet-widget:hover .pet-name-tag { border-color: var(--accent); color: var(--text); }
+		.pet-hair-female, .pet-lash, .pet-eyeshadow, .pet-neckbow { display: none; }
+		.pet-svg[data-gender="female"] .pet-hair-male { display: none; }
+		.pet-svg[data-gender="female"] .pet-hair-female,
+		.pet-svg[data-gender="female"] .pet-lash,
+		.pet-svg[data-gender="female"] .pet-neckbow { display: block; }
+		.pet-svg[data-gender="female"] .pet-eyeshadow { display: block; }
+		.pet-svg[data-gender="female"] .pet-eyeshadow ellipse { opacity: .32; }
+		.pet-gender-row { display: flex; gap: 8px; }
+		.pet-gender-btn { flex: 1; }
+		.pet-gender-btn.active { border-color: var(--accent); color: var(--text); font-weight: 600; }
 		/* 伙伴页 */
 		.pet-stage {
 			text-align: center; padding: 18px 0 10px;
@@ -686,6 +696,11 @@
 			<g class="pet-body">
 				<rect x="26" y="66" width="68" height="52" rx="15" fill="url(#petSuit)" />
 				<path d="M 42 66 L 60 80 L 78 66" fill="none" stroke="#2c4a5f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+				<g class="pet-neckbow">
+					<path d="M 53 72 Q 47 67 44 71 Q 43 76 49 75 Z" fill="#ff9ab0" />
+					<path d="M 53 72 Q 59 67 62 71 Q 63 76 57 75 Z" fill="#ff6b85" />
+					<circle cx="53" cy="73" r="1.8" fill="#e84f6d" />
+				</g>
 				<rect x="46" y="86" width="12" height="10" rx="2" fill="#2c4a5f" opacity=".85" />
 				<path d="M 46 91 h 12" stroke="#1f3443" stroke-width="1.2" />
 				<circle cx="56" cy="104" r="2.2" fill="#d9e4ee" />
@@ -707,8 +722,26 @@
 			<g class="pet-head">
 				<circle cx="60" cy="40" r="26" fill="url(#petSkin)" />
 				<ellipse cx="50" cy="31" rx="9" ry="6" fill="#fff" opacity=".25" />
-				<path d="M 34 34 Q 33 13 60 13 Q 87 13 86 34 Q 86 18 76 15 Q 66 21 60 21 Q 54 21 44 15 Q 34 18 34 34 Z" fill="url(#petHair)" />
-				<path d="M 42 16 Q 50 12 58 14" stroke="#7a6252" stroke-width="1.6" stroke-linecap="round" fill="none" opacity=".7" />
+				<g class="pet-hair-male">
+					<path d="M 34 34 Q 33 13 60 13 Q 87 13 86 34 Q 86 18 76 15 Q 66 21 60 21 Q 54 21 44 15 Q 34 18 34 34 Z" fill="url(#petHair)" />
+					<path d="M 42 16 Q 50 12 58 14" stroke="#7a6252" stroke-width="1.6" stroke-linecap="round" fill="none" opacity=".7" />
+				</g>
+				<g class="pet-hair-female">
+					<path d="M 34 34 Q 33 10 60 10 Q 87 10 86 34 Q 86 24 80 20 L 74 34 Q 66 21 60 21 Q 54 21 46 34 L 40 20 Q 34 24 34 34 Z" fill="url(#petHair)" />
+					<path d="M 44 14 Q 52 10 60 11" stroke="#8a7260" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".65" />
+					<path d="M 34 26 Q 20 28 16 40 Q 13 50 17 58 Q 21 52 24 44 Q 26 36 32 32 Z" fill="url(#petHair)" />
+					<path d="M 86 26 Q 100 28 104 40 Q 107 50 103 58 Q 99 52 96 44 Q 94 36 88 32 Z" fill="url(#petHair)" />
+					<g class="pet-bow-l">
+						<path d="M 24 22 Q 17 17 15 21 Q 14 26 20 27 Z" fill="#ff9ab0" />
+						<path d="M 24 22 Q 31 17 33 21 Q 34 26 28 27 Z" fill="#ff6b85" />
+						<circle cx="24" cy="23" r="2" fill="#e84f6d" />
+					</g>
+					<g class="pet-bow-r">
+						<path d="M 96 22 Q 89 17 87 21 Q 86 26 92 27 Z" fill="#ff9ab0" />
+						<path d="M 96 22 Q 103 17 105 21 Q 106 26 100 27 Z" fill="#ff6b85" />
+						<circle cx="96" cy="23" r="2" fill="#e84f6d" />
+					</g>
+				</g>
 				<g class="pet-face">
 					<path class="pet-brow pet-brow-l" d="M 43 32 Q 50 29 56 31" />
 					<path class="pet-brow pet-brow-r" d="M 64 31 Q 70 29 77 32" />
@@ -716,11 +749,17 @@
 						<ellipse class="pet-eye-w" cx="50" cy="40" rx="5.5" ry="6.5" />
 						<circle class="pet-pupil" cx="51" cy="41" r="3" />
 						<circle cx="52.5" cy="39" r="1.1" fill="#fff" />
+						<path class="pet-lash" d="M 44.5 36.5 Q 50 32.5 55.5 35.5" stroke="#4a3b32" stroke-width="1.6" fill="none" stroke-linecap="round" />
 					</g>
 					<g class="pet-eye-g">
 						<ellipse class="pet-eye-w" cx="70" cy="40" rx="5.5" ry="6.5" />
 						<circle class="pet-pupil" cx="71" cy="41" r="3" />
 						<circle cx="72.5" cy="39" r="1.1" fill="#fff" />
+						<path class="pet-lash" d="M 64.5 35.5 Q 70 32.5 75.5 36.5" stroke="#4a3b32" stroke-width="1.6" fill="none" stroke-linecap="round" />
+					</g>
+					<g class="pet-eyeshadow">
+						<ellipse cx="50" cy="37.5" rx="6.2" ry="2.6" fill="#f7a8c0" />
+						<ellipse cx="70" cy="37.5" rx="6.2" ry="2.6" fill="#f7a8c0" />
 					</g>
 					<ellipse cx="42" cy="48" rx="4.6" ry="2.6" fill="#e88f7a" opacity=".55" />
 					<ellipse cx="78" cy="48" rx="4.6" ry="2.6" fill="#e88f7a" opacity=".55" />
@@ -733,6 +772,13 @@
 		</div>
 
 		<div class="card">
+			<div class="field" style="margin-bottom: 10px;">
+				<label>角色</label>
+				<div class="pet-gender-row">
+					<button class="btn pet-gender-btn active" id="petGenderMale">🧑‍🔧 男工程师</button>
+					<button class="btn pet-gender-btn" id="petGenderFemale">👩‍🔧 女工程师</button>
+				</div>
+			</div>
 			<div class="field" style="margin-bottom: 10px;">
 				<label>伙伴名字</label>
 				<input class="input" id="petName" maxlength="12" placeholder="小EE" />
@@ -1958,7 +2004,7 @@
 			todo: ['待办清零，好耶！✅', '搞定一项，继续冲！', '小任务完成！', '清单又短了一截～'],
 			sleep: ['Zzz…', '呼噜…别吵我', '梦里在画板子…'],
 		};
-		let pet = { name: '小EE', enabled: true, size: 92 };
+		let pet = { name: '小EE', enabled: true, size: 92, gender: 'male' };
 		let petBubbleTimer = null;
 		let petBlinkTimer = null;
 		let petSleepTimer = null;
@@ -1975,6 +2021,8 @@
 			document.getElementById('petSize').value = pet.size;
 			document.getElementById('petSizeLabel').textContent = pet.size;
 			document.getElementById('petEnabled').checked = pet.enabled;
+			document.getElementById('petGenderMale').classList.toggle('active', pet.gender !== 'female');
+			document.getElementById('petGenderFemale').classList.toggle('active', pet.gender === 'female');
 			petApplyAll();
 		}
 		async function savePet() {
@@ -2056,6 +2104,8 @@
 			document.getElementById('petSvg').style.height = size + 'px';
 			document.getElementById('petNameTag').textContent = pet.name;
 			document.getElementById('petNameBig').textContent = pet.name;
+			document.getElementById('petSvg').dataset.gender = pet.gender === 'female' ? 'female' : 'male';
+			document.getElementById('petBig').dataset.gender = pet.gender === 'female' ? 'female' : 'male';
 			if (typeof pet.left === 'number' && typeof pet.top === 'number') {
 				widget.style.left = pet.left + 'px';
 				widget.style.top = pet.top + 'px';
@@ -2149,6 +2199,22 @@
 			toast('伙伴设置已保存', 'success', 2);
 			petSay('记住了，我是' + pet.name + '！');
 		});
+		function petSetGender(g) {
+			if (pet.gender === g) return;
+			pet.gender = g;
+			if (pet.name === '小EE' || pet.name === '小E妹') {
+				pet.name = g === 'female' ? '小E妹' : '小EE';
+			}
+			savePet();
+			petApplyAll();
+			document.getElementById('petName').value = pet.name;
+			document.getElementById('petGenderMale').classList.toggle('active', g !== 'female');
+			document.getElementById('petGenderFemale').classList.toggle('active', g === 'female');
+			toast('角色已切换为' + (g === 'female' ? '女工程师' : '男工程师'), 'success', 2);
+			petSay('嗨，我是' + pet.name + '！');
+		}
+		document.getElementById('petGenderMale').addEventListener('click', () => petSetGender('male'));
+		document.getElementById('petGenderFemale').addEventListener('click', () => petSetGender('female'));
 		document.getElementById('petPoke').addEventListener('click', petPoke);
 
 		document.getElementById('petLinesBox').innerHTML =
