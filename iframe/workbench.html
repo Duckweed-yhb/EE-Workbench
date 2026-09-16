@@ -359,8 +359,9 @@
 		.pet-widget {
 			position: fixed; right: 14px; bottom: 14px; z-index: 20;
 			display: flex; flex-direction: column; align-items: center;
-			cursor: pointer; user-select: none;
+			cursor: grab; user-select: none; touch-action: none;
 		}
+		.pet-widget.dragging { cursor: grabbing; }
 		.pet-widget.hidden { display: none; }
 		.pet-bubble {
 			position: relative; max-width: 180px; min-width: 60px;
@@ -378,39 +379,103 @@
 			border-right: 5px solid transparent;
 			border-top: 5px solid var(--panel);
 		}
+		.pet-confetti { position: absolute; left: 50%; top: 18%; pointer-events: none; }
+		.pet-confetti span {
+			position: absolute; width: 7px; height: 10px; border-radius: 2px;
+			opacity: 0; animation: pet-confetti-fly 1.1s ease-out forwards;
+		}
+		@keyframes pet-confetti-fly {
+			0% { opacity: 1; transform: translate(0, 0) rotate(0); }
+			100% { opacity: 0; transform: translate(var(--fx), var(--fy)) rotate(var(--fr)); }
+		}
+		.pet-zzz { position: absolute; top: 6px; right: -4px; display: none; flex-direction: column; pointer-events: none; }
+		.pet-zzz.on { display: flex; }
+		.pet-zzz span { font-size: 13px; font-weight: 800; color: var(--accent); opacity: 0; }
+		.pet-zzz span:nth-child(1) { animation: pet-zzz 2.6s ease-out infinite; }
+		.pet-zzz span:nth-child(2) { animation: pet-zzz 2.6s ease-out .85s infinite; font-size: 10px; }
+		.pet-zzz span:nth-child(3) { animation: pet-zzz 2.6s ease-out 1.7s infinite; font-size: 8px; }
+		@keyframes pet-zzz {
+			0% { opacity: 0; transform: translate(0, 5px) scale(.8); }
+			30% { opacity: .95; }
+			100% { opacity: 0; transform: translate(12px, -18px) scale(1.25); }
+		}
 		.pet-svg {
 			width: 92px; height: 92px; filter: drop-shadow(0 5px 10px var(--shadow));
-			animation: pet-bob 3.2s ease-in-out infinite;
+			animation: pet-bob 3.4s ease-in-out infinite; cursor: grab;
 		}
-		.pet-svg.celebrate { animation: pet-hop .6s ease-in-out 2; }
+		.pet-widget:hover .pet-svg { filter: drop-shadow(0 7px 14px var(--shadow)) brightness(1.05); }
+		.pet-svg.celebrate { animation: pet-hop .62s ease-in-out 2; }
 		.pet-svg.wiggle { animation: pet-wiggle .45s ease-in-out; }
+		.pet-svg.mood-in { animation: pet-mood-in .3s ease-out; }
 		@keyframes pet-bob {
-			0%, 100% { transform: translateY(0); }
-			50% { transform: translateY(-4px); }
+			0%, 100% { transform: translateY(0) rotate(0deg); }
+			50% { transform: translateY(-5px) rotate(-1.2deg); }
 		}
 		@keyframes pet-hop {
 			0%, 100% { transform: translateY(0) scale(1); }
-			30% { transform: translateY(-16px) scale(1.06); }
-			60% { transform: translateY(0) scale(.97); }
+			25% { transform: translateY(-20px) scale(1.08, .93); }
+			50% { transform: translateY(0) scale(.95, 1.05); }
+			75% { transform: translateY(-9px) scale(1.03, .97); }
 		}
 		@keyframes pet-wiggle {
 			0%, 100% { transform: rotate(0); }
-			25% { transform: rotate(-7deg); }
-			75% { transform: rotate(7deg); }
+			25% { transform: rotate(-8deg); }
+			75% { transform: rotate(8deg); }
 		}
-		.pet-svg .pet-eye { transition: transform .08s; transform-box: fill-box; transform-origin: center; }
-		.pet-svg.blink .pet-eye { transform: scaleY(.12); }
-		.pet-svg .pet-prop { display: none; }
-		.pet-svg[data-mood="working"] .pet-prop.working { display: block; }
-		.pet-svg[data-mood="resting"] .pet-prop.resting { display: block; }
-		.pet-svg[data-mood="celebrate"] .pet-prop.celebrate { display: block; }
-		.pet-svg[data-mood="working"] .pet-face { transform: translateY(2px); }
-		.pet-svg[data-mood="working"] .pet-mouth { d: path("M 52 62 Q 60 66 68 62"); }
+		@keyframes pet-mood-in {
+			0% { transform: scale(.94); opacity: .4; }
+			100% { transform: scale(1); opacity: 1; }
+		}
+		.pet-shadow { fill: rgba(0, 0, 0, .22); animation: pet-shadow 3.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+		@keyframes pet-shadow {
+			0%, 100% { transform: scaleX(1); opacity: .8; }
+			50% { transform: scaleX(.9); opacity: .55; }
+		}
+		.pet-body { transform-origin: 50% 100%; animation: pet-breathe 3.4s ease-in-out infinite; transform-box: fill-box; }
+		@keyframes pet-breathe {
+			0%, 100% { transform: scaleY(1); }
+			50% { transform: scaleY(1.014); }
+		}
+		.pet-eye-w { fill: #fff; }
+		.pet-pupil { fill: #1d2530; }
+		.pet-eye-g { transition: transform .1s; transform-box: fill-box; transform-origin: center; }
+		.pet-svg.blink .pet-eye-g { transform: scaleY(.1); }
+		.pet-brow { stroke: #3a2f28; stroke-width: 2; stroke-linecap: round; fill: none; transition: transform .25s; transform-box: fill-box; transform-origin: center; }
+		.pet-svg[data-mood="working"] .pet-brow-l { transform: rotate(-14deg) translateY(2px); }
+		.pet-svg[data-mood="working"] .pet-brow-r { transform: rotate(14deg) translateY(2px); }
+		.pet-svg[data-mood="celebrate"] .pet-brow-l { transform: rotate(14deg) translateY(-1px); }
+		.pet-svg[data-mood="celebrate"] .pet-brow-r { transform: rotate(-14deg) translateY(-1px); }
+		.pet-mouth { fill: none; stroke: #7a4a30; stroke-width: 2.2; stroke-linecap: round; transition: d .2s, fill .2s; }
+		.pet-svg[data-mood="idle"] .pet-mouth { d: path("M 54 52 Q 60 57 66 52"); }
+		.pet-svg[data-mood="working"] .pet-mouth { d: path("M 53 54 Q 60 58 67 54"); }
+		.pet-svg[data-mood="resting"] .pet-mouth { d: path("M 55 51 Q 60 54 65 51"); }
+		.pet-svg[data-mood="celebrate"] .pet-mouth { d: path("M 53 50 Q 60 64 67 50 Z"); fill: #7a4a30; }
+		.pet-svg[data-mood="sleep"] .pet-mouth { d: path("M 56 55 Q 60 58 64 55"); }
+		.pet-glow { fill: #7fd4ff; opacity: 0; transition: opacity .4s; }
+		.pet-svg[data-mood="working"] .pet-glow { opacity: .18; }
+		.pet-prop { opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s; }
+		.pet-svg[data-mood="working"] .pet-prop.working { opacity: 1; visibility: visible; }
+		.pet-svg[data-mood="resting"] .pet-prop.resting { opacity: 1; visibility: visible; }
+		.pet-svg[data-mood="celebrate"] .pet-prop.celebrate { opacity: 1; visibility: visible; }
+		.pet-led { fill: #ff5b4d; animation: pet-led 1.5s ease-in-out infinite; }
+		@keyframes pet-led { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+		.pet-steam path { fill: none; stroke: rgba(255, 255, 255, .7); stroke-width: 2; stroke-linecap: round; opacity: 0; animation: pet-steam 1.9s ease-out infinite; }
+		.pet-steam path:nth-child(2) { animation-delay: .65s; }
+		.pet-steam path:nth-child(3) { animation-delay: 1.3s; }
+		@keyframes pet-steam {
+			0% { opacity: 0; transform: translateY(6px); }
+			40% { opacity: .75; }
+			100% { opacity: 0; transform: translateY(-9px); }
+		}
+		.pet-arm-l, .pet-arm-r { transition: transform .35s; transform-box: fill-box; transform-origin: 50% 12%; }
+		.pet-svg.celebrate .pet-arm-l { transform: rotate(-40deg); }
+		.pet-svg.celebrate .pet-arm-r { transform: rotate(40deg); }
 		.pet-name-tag {
 			margin-top: 3px; font-size: 10px; color: var(--dim);
 			background: var(--panel); border: 1px solid var(--border);
-			border-radius: 10px; padding: 1px 8px;
+			border-radius: 10px; padding: 1px 8px; transition: border-color .2s, color .2s;
 		}
+		.pet-widget:hover .pet-name-tag { border-color: var(--accent); color: var(--text); }
 		/* 伙伴页 */
 		.pet-stage {
 			text-align: center; padding: 18px 0 10px;
@@ -418,11 +483,11 @@
 			border-radius: var(--radius); margin-bottom: 12px;
 		}
 		.pet-stage .pet-svg {
-			width: 150px; height: 150px; animation: pet-bob 3.2s ease-in-out infinite;
+			width: 150px; height: 150px; animation: pet-bob 3.4s ease-in-out infinite;
 		}
 		.pet-stage .pet-name-big { margin-top: 8px; font-size: 13px; font-weight: 600; }
 		.pet-stage .pet-mood-line { margin-top: 3px; font-size: 11px; color: var(--dim); }
-		.pet-mood-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0; }
+		.pet-mood-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 12px 0; }
 		.pet-mood-cell {
 			text-align: center; padding: 8px 2px; border-radius: 8px;
 			border: 1px solid var(--border); background: var(--bg); font-size: 10.5px; color: var(--dim);
@@ -595,41 +660,74 @@
 
 		<div class="pet-stage">
 			<svg class="pet-svg" id="petBig" data-mood="idle" viewBox="0 0 120 132" aria-label="桌面玩偶">
-				<g class="pet-prop celebrating"><text x="88" y="26" font-size="24">🎉</text></g>
-				<g class="pet-prop working">
-					<rect x="30" y="18" width="60" height="16" rx="8" fill="#3a4658" />
-					<rect x="38" y="12" width="44" height="10" rx="5" fill="#3a4658" />
-					<rect x="18" y="30" width="8" height="12" rx="4" fill="#ff6b4a" />
-					<rect x="94" y="30" width="8" height="12" rx="4" fill="#ff6b4a" />
+			<g class="pet-prop working">
+				<path d="M 24 32 Q 24 8 60 8 Q 96 8 96 32" fill="none" stroke="url(#petMetal)" stroke-width="5" stroke-linecap="round" />
+				<rect x="16" y="26" width="11" height="18" rx="5.5" fill="#2b3f56" stroke="url(#petMetal)" stroke-width="2" />
+				<rect x="93" y="26" width="11" height="18" rx="5.5" fill="#2b3f56" stroke="url(#petMetal)" stroke-width="2" />
+				<circle class="pet-led" cx="21.5" cy="42" r="2" />
+				<circle class="pet-led" cx="98.5" cy="42" r="2" />
+				<ellipse class="pet-glow" cx="60" cy="46" rx="23" ry="17" />
+			</g>
+			<g class="pet-prop resting">
+				<path d="M 76 82 Q 82 74 88 82" fill="none" stroke="#7a4a30" stroke-width="2.4" stroke-linecap="round" />
+				<rect x="82" y="76" width="24" height="19" rx="4" fill="url(#petCup)" stroke="#b9c6d4" stroke-width="1.5" />
+				<path d="M 104 80 Q 111 83 104 90" fill="none" stroke="#b9c6d4" stroke-width="2.5" />
+				<ellipse cx="94" cy="78" rx="11" ry="3" fill="#8a5a33" />
+				<g class="pet-steam">
+					<path d="M 88 70 Q 90 65 88 60" />
+					<path d="M 96 70 Q 98 64 96 58" />
+					<path d="M 92 71 Q 94 66 92 61" />
 				</g>
-				<g class="pet-prop resting">
-					<rect x="84" y="78" width="22" height="18" rx="3" fill="#f0f3f7" stroke="#c9d2dd" />
-					<path d="M 86 78 Q 95 66 104 78 Z" fill="#e8edf3" stroke="#c9d2dd" />
-					<rect x="99" y="94" width="6" height="7" rx="2" fill="#c9d2dd" />
-					<path d="M 78 82 Q 84 76 90 82" fill="none" stroke="#b98b5f" stroke-width="2.5" />
-				</g>
-				<!-- 身体 -->
-				<rect x="26" y="66" width="68" height="58" rx="16" fill="#3f6f8f" />
-				<rect x="26" y="66" width="68" height="18" rx="9" fill="#355f7c" />
-				<circle cx="60" cy="74" r="6" fill="#f2c9a0" />
-				<!-- 手臂 -->
-				<path d="M 26 80 Q 14 92 18 104" stroke="#3f6f8f" stroke-width="8" stroke-linecap="round" fill="none" />
-				<path d="M 94 80 Q 106 92 102 104" stroke="#3f6f8f" stroke-width="8" stroke-linecap="round" fill="none" />
-				<!-- 腿 -->
-				<rect x="38" y="118" width="14" height="12" rx="5" fill="#2c4a5f" />
-				<rect x="68" y="118" width="14" height="12" rx="5" fill="#2c4a5f" />
-				<!-- 头 -->
-				<circle cx="60" cy="40" r="26" fill="#f2c9a0" />
-				<path d="M 34 36 Q 34 14 60 14 Q 86 14 86 36 Q 86 22 78 18 Q 66 24 60 24 Q 54 24 42 18 Q 34 22 34 36 Z" fill="#4a3b32" />
-				<!-- 脸 -->
+			</g>
+			<g class="pet-prop celebrate">
+				<text x="88" y="26" font-size="24">🎉</text>
+			</g>
+			<ellipse class="pet-shadow" cx="60" cy="129" rx="26" ry="3.4" />
+			<g class="pet-body">
+				<rect x="26" y="66" width="68" height="52" rx="15" fill="url(#petSuit)" />
+				<path d="M 42 66 L 60 80 L 78 66" fill="none" stroke="#2c4a5f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+				<rect x="46" y="86" width="12" height="10" rx="2" fill="#2c4a5f" opacity=".85" />
+				<path d="M 46 91 h 12" stroke="#1f3443" stroke-width="1.2" />
+				<circle cx="56" cy="104" r="2.2" fill="#d9e4ee" />
+				<circle cx="64" cy="104" r="2.2" fill="#d9e4ee" />
+				<rect x="26" y="106" width="68" height="12" rx="6" fill="#2c4a5f" />
+			</g>
+			<g class="pet-arm-l">
+				<path d="M 28 76 Q 16 88 20 104" stroke="url(#petSuit)" stroke-width="9" stroke-linecap="round" fill="none" />
+				<circle cx="19.5" cy="106" r="5" fill="url(#petSkin)" />
+			</g>
+			<g class="pet-arm-r">
+				<path d="M 92 76 Q 104 88 100 104" stroke="url(#petSuit)" stroke-width="9" stroke-linecap="round" fill="none" />
+				<circle cx="100.5" cy="106" r="5" fill="url(#petSkin)" />
+			</g>
+			<rect x="38" y="116" width="15" height="9" rx="4" fill="#24405a" />
+			<rect x="67" y="116" width="15" height="9" rx="4" fill="#24405a" />
+			<rect x="36" y="124" width="22" height="6" rx="3" fill="#1c3144" />
+			<rect x="62" y="124" width="22" height="6" rx="3" fill="#1c3144" />
+			<g class="pet-head">
+				<circle cx="60" cy="40" r="26" fill="url(#petSkin)" />
+				<ellipse cx="50" cy="31" rx="9" ry="6" fill="#fff" opacity=".25" />
+				<path d="M 34 34 Q 33 13 60 13 Q 87 13 86 34 Q 86 18 76 15 Q 66 21 60 21 Q 54 21 44 15 Q 34 18 34 34 Z" fill="url(#petHair)" />
+				<path d="M 42 16 Q 50 12 58 14" stroke="#7a6252" stroke-width="1.6" stroke-linecap="round" fill="none" opacity=".7" />
 				<g class="pet-face">
-					<ellipse class="pet-eye" cx="50" cy="40" rx="3.6" ry="4.6" fill="#1d2530" />
-					<ellipse class="pet-eye" cx="70" cy="40" rx="3.6" ry="4.6" fill="#1d2530" />
-					<ellipse cx="44" cy="48" rx="4.5" ry="2.6" fill="#e8a98f" opacity=".7" />
-					<ellipse cx="76" cy="48" rx="4.5" ry="2.6" fill="#e8a98f" opacity=".7" />
-					<path class="pet-mouth" d="M 55 52 Q 60 56 65 52" stroke="#7a4a30" stroke-width="2.2" stroke-linecap="round" fill="none" />
+					<path class="pet-brow pet-brow-l" d="M 43 32 Q 50 29 56 31" />
+					<path class="pet-brow pet-brow-r" d="M 64 31 Q 70 29 77 32" />
+					<g class="pet-eye-g">
+						<ellipse class="pet-eye-w" cx="50" cy="40" rx="5.5" ry="6.5" />
+						<circle class="pet-pupil" cx="51" cy="41" r="3" />
+						<circle cx="52.5" cy="39" r="1.1" fill="#fff" />
+					</g>
+					<g class="pet-eye-g">
+						<ellipse class="pet-eye-w" cx="70" cy="40" rx="5.5" ry="6.5" />
+						<circle class="pet-pupil" cx="71" cy="41" r="3" />
+						<circle cx="72.5" cy="39" r="1.1" fill="#fff" />
+					</g>
+					<ellipse cx="42" cy="48" rx="4.6" ry="2.6" fill="#e88f7a" opacity=".55" />
+					<ellipse cx="78" cy="48" rx="4.6" ry="2.6" fill="#e88f7a" opacity=".55" />
+					<path class="pet-mouth" d="M 54 52 Q 60 57 66 52" />
 				</g>
-			</svg>
+			</g>
+		</svg>
 			<div class="pet-name-big" id="petNameBig">小EE</div>
 			<div class="pet-mood-line" id="petMoodLine">戳一戳我，我会回应你</div>
 		</div>
@@ -662,46 +760,117 @@
 				<div class="pet-mood-cell"><span class="emo">☕</span>休息时<br />喝咖啡放松</div>
 				<div class="pet-mood-cell"><span class="emo">🎉</span>完成时<br />蹦跳庆祝</div>
 				<div class="pet-mood-cell"><span class="emo">😊</span>空闲时<br />漂浮待机</div>
+				<div class="pet-mood-cell"><span class="emo">😴</span>久坐时<br />打盹冒 Zzz</div>
+			</div>
+				<div class="pet-mood-cell"><span class="emo">☕</span>休息时<br />喝咖啡放松</div>
+				<div class="pet-mood-cell"><span class="emo">🎉</span>完成时<br />蹦跳庆祝</div>
+				<div class="pet-mood-cell"><span class="emo">😊</span>空闲时<br />漂浮待机</div>
 			</div>
 			<div class="pet-lines-box" id="petLinesBox"></div>
 		</div>
 	</section>
 
 	<!-- ===================== 常驻桌面玩偶 ===================== -->
+	<svg id="petDefs" width="0" height="0" style="position:absolute; pointer-events:none" aria-hidden="true">
+		<defs>
+			<radialGradient id="petSkin" cx="38%" cy="32%" r="78%">
+				<stop offset="0%" stop-color="#ffe4cb" />
+				<stop offset="100%" stop-color="#f0c096" />
+			</radialGradient>
+			<linearGradient id="petHair" x1="0" y1="0" x2="0" y2="1">
+				<stop offset="0%" stop-color="#5d4a3d" />
+				<stop offset="100%" stop-color="#3b2f27" />
+			</linearGradient>
+			<linearGradient id="petSuit" x1="0" y1="0" x2="0" y2="1">
+				<stop offset="0%" stop-color="#4d7f9f" />
+				<stop offset="100%" stop-color="#34607f" />
+			</linearGradient>
+			<linearGradient id="petMetal" x1="0" y1="0" x2="1" y2="0">
+				<stop offset="0%" stop-color="#5a6b80" />
+				<stop offset="50%" stop-color="#93a6bc" />
+				<stop offset="100%" stop-color="#5a6b80" />
+			</linearGradient>
+			<linearGradient id="petCup" x1="0" y1="0" x2="0" y2="1">
+				<stop offset="0%" stop-color="#ffffff" />
+				<stop offset="100%" stop-color="#d9e2ec" />
+			</linearGradient>
+		</defs>
+	</svg>
 	<div class="pet-widget" id="petWidget">
 		<div class="pet-bubble" id="petBubble"></div>
+		<div class="pet-confetti" id="petConfetti"></div>
+		<div class="pet-zzz" id="petZzz"><span>Z</span><span>z</span><span>z</span></div>
 		<svg class="pet-svg" id="petSvg" data-mood="idle" viewBox="0 0 120 132" aria-label="小EE">
-			<g class="pet-prop celebrating"><text x="88" y="26" font-size="24">🎉</text></g>
 			<g class="pet-prop working">
-				<rect x="30" y="18" width="60" height="16" rx="8" fill="#3a4658" />
-				<rect x="38" y="12" width="44" height="10" rx="5" fill="#3a4658" />
-				<rect x="18" y="30" width="8" height="12" rx="4" fill="#ff6b4a" />
-				<rect x="94" y="30" width="8" height="12" rx="4" fill="#ff6b4a" />
+				<path d="M 24 32 Q 24 8 60 8 Q 96 8 96 32" fill="none" stroke="url(#petMetal)" stroke-width="5" stroke-linecap="round" />
+				<rect x="16" y="26" width="11" height="18" rx="5.5" fill="#2b3f56" stroke="url(#petMetal)" stroke-width="2" />
+				<rect x="93" y="26" width="11" height="18" rx="5.5" fill="#2b3f56" stroke="url(#petMetal)" stroke-width="2" />
+				<circle class="pet-led" cx="21.5" cy="42" r="2" />
+				<circle class="pet-led" cx="98.5" cy="42" r="2" />
+				<ellipse class="pet-glow" cx="60" cy="46" rx="23" ry="17" />
 			</g>
 			<g class="pet-prop resting">
-				<rect x="84" y="78" width="22" height="18" rx="3" fill="#f0f3f7" stroke="#c9d2dd" />
-				<path d="M 86 78 Q 95 66 104 78 Z" fill="#e8edf3" stroke="#c9d2dd" />
-				<rect x="99" y="94" width="6" height="7" rx="2" fill="#c9d2dd" />
-				<path d="M 78 82 Q 84 76 90 82" fill="none" stroke="#b98b5f" stroke-width="2.5" />
+				<path d="M 76 82 Q 82 74 88 82" fill="none" stroke="#7a4a30" stroke-width="2.4" stroke-linecap="round" />
+				<rect x="82" y="76" width="24" height="19" rx="4" fill="url(#petCup)" stroke="#b9c6d4" stroke-width="1.5" />
+				<path d="M 104 80 Q 111 83 104 90" fill="none" stroke="#b9c6d4" stroke-width="2.5" />
+				<ellipse cx="94" cy="78" rx="11" ry="3" fill="#8a5a33" />
+				<g class="pet-steam">
+					<path d="M 88 70 Q 90 65 88 60" />
+					<path d="M 96 70 Q 98 64 96 58" />
+					<path d="M 92 71 Q 94 66 92 61" />
+				</g>
 			</g>
-			<rect x="26" y="66" width="68" height="58" rx="16" fill="#3f6f8f" />
-			<rect x="26" y="66" width="68" height="18" rx="9" fill="#355f7c" />
-			<circle cx="60" cy="74" r="6" fill="#f2c9a0" />
-			<path d="M 26 80 Q 14 92 18 104" stroke="#3f6f8f" stroke-width="8" stroke-linecap="round" fill="none" />
-			<path d="M 94 80 Q 106 92 102 104" stroke="#3f6f8f" stroke-width="8" stroke-linecap="round" fill="none" />
-			<rect x="38" y="118" width="14" height="12" rx="5" fill="#2c4a5f" />
-			<rect x="68" y="118" width="14" height="12" rx="5" fill="#2c4a5f" />
-			<circle cx="60" cy="40" r="26" fill="#f2c9a0" />
-			<path d="M 34 36 Q 34 14 60 14 Q 86 14 86 36 Q 86 22 78 18 Q 66 24 60 24 Q 54 24 42 18 Q 34 22 34 36 Z" fill="#4a3b32" />
-			<g class="pet-face">
-				<ellipse class="pet-eye" cx="50" cy="40" rx="3.6" ry="4.6" fill="#1d2530" />
-				<ellipse class="pet-eye" cx="70" cy="40" rx="3.6" ry="4.6" fill="#1d2530" />
-				<ellipse cx="44" cy="48" rx="4.5" ry="2.6" fill="#e8a98f" opacity=".7" />
-				<ellipse cx="76" cy="48" rx="4.5" ry="2.6" fill="#e8a98f" opacity=".7" />
-				<path class="pet-mouth" d="M 55 52 Q 60 56 65 52" stroke="#7a4a30" stroke-width="2.2" stroke-linecap="round" fill="none" />
+			<g class="pet-prop celebrate">
+				<text x="88" y="26" font-size="24">🎉</text>
+			</g>
+			<ellipse class="pet-shadow" cx="60" cy="129" rx="26" ry="3.4" />
+			<g class="pet-body">
+				<rect x="26" y="66" width="68" height="52" rx="15" fill="url(#petSuit)" />
+				<path d="M 42 66 L 60 80 L 78 66" fill="none" stroke="#2c4a5f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+				<rect x="46" y="86" width="12" height="10" rx="2" fill="#2c4a5f" opacity=".85" />
+				<path d="M 46 91 h 12" stroke="#1f3443" stroke-width="1.2" />
+				<circle cx="56" cy="104" r="2.2" fill="#d9e4ee" />
+				<circle cx="64" cy="104" r="2.2" fill="#d9e4ee" />
+				<rect x="26" y="106" width="68" height="12" rx="6" fill="#2c4a5f" />
+			</g>
+			<g class="pet-arm-l">
+				<path d="M 28 76 Q 16 88 20 104" stroke="url(#petSuit)" stroke-width="9" stroke-linecap="round" fill="none" />
+				<circle cx="19.5" cy="106" r="5" fill="url(#petSkin)" />
+			</g>
+			<g class="pet-arm-r">
+				<path d="M 92 76 Q 104 88 100 104" stroke="url(#petSuit)" stroke-width="9" stroke-linecap="round" fill="none" />
+				<circle cx="100.5" cy="106" r="5" fill="url(#petSkin)" />
+			</g>
+			<rect x="38" y="116" width="15" height="9" rx="4" fill="#24405a" />
+			<rect x="67" y="116" width="15" height="9" rx="4" fill="#24405a" />
+			<rect x="36" y="124" width="22" height="6" rx="3" fill="#1c3144" />
+			<rect x="62" y="124" width="22" height="6" rx="3" fill="#1c3144" />
+			<g class="pet-head">
+				<circle cx="60" cy="40" r="26" fill="url(#petSkin)" />
+				<ellipse cx="50" cy="31" rx="9" ry="6" fill="#fff" opacity=".25" />
+				<path d="M 34 34 Q 33 13 60 13 Q 87 13 86 34 Q 86 18 76 15 Q 66 21 60 21 Q 54 21 44 15 Q 34 18 34 34 Z" fill="url(#petHair)" />
+				<path d="M 42 16 Q 50 12 58 14" stroke="#7a6252" stroke-width="1.6" stroke-linecap="round" fill="none" opacity=".7" />
+				<g class="pet-face">
+					<path class="pet-brow pet-brow-l" d="M 43 32 Q 50 29 56 31" />
+					<path class="pet-brow pet-brow-r" d="M 64 31 Q 70 29 77 32" />
+					<g class="pet-eye-g">
+						<ellipse class="pet-eye-w" cx="50" cy="40" rx="5.5" ry="6.5" />
+						<circle class="pet-pupil" cx="51" cy="41" r="3" />
+						<circle cx="52.5" cy="39" r="1.1" fill="#fff" />
+					</g>
+					<g class="pet-eye-g">
+						<ellipse class="pet-eye-w" cx="70" cy="40" rx="5.5" ry="6.5" />
+						<circle class="pet-pupil" cx="71" cy="41" r="3" />
+						<circle cx="72.5" cy="39" r="1.1" fill="#fff" />
+					</g>
+					<ellipse cx="42" cy="48" rx="4.6" ry="2.6" fill="#e88f7a" opacity=".55" />
+					<ellipse cx="78" cy="48" rx="4.6" ry="2.6" fill="#e88f7a" opacity=".55" />
+					<path class="pet-mouth" d="M 54 52 Q 60 57 66 52" />
+				</g>
 			</g>
 		</svg>
 		<div class="pet-name-tag" id="petNameTag">小EE</div>
+	</div>
 	</div>
 
 	<!-- ===================== 新建/编辑项目弹层 ===================== -->
@@ -1787,10 +1956,15 @@
 			idle: ['我在这儿陪着你～', '要不要开个番茄钟？', '画板子去啦！', '有什么新想法吗？'],
 			celebrate: ['太棒了！🎉', '又完成一个！', '厉害呀！', '进度 +1！'],
 			todo: ['待办清零，好耶！✅', '搞定一项，继续冲！', '小任务完成！', '清单又短了一截～'],
+			sleep: ['Zzz…', '呼噜…别吵我', '梦里在画板子…'],
 		};
 		let pet = { name: '小EE', enabled: true, size: 92 };
 		let petBubbleTimer = null;
 		let petBlinkTimer = null;
+		let petSleepTimer = null;
+		let petDrag = null;
+		let petSuppressClick = false;
+		let petCelebrateUntil = 0;
 
 		async function loadPet() {
 			const raw = await storage.get('pet');
@@ -1813,11 +1987,28 @@
 			return 'idle';
 		}
 		function petSetMood(m) {
-			document.getElementById('petSvg').dataset.mood = m;
-			document.getElementById('petBig').dataset.mood = m;
-			const moodText = m === 'working' ? '正在专注工作…' : m === 'resting' ? '休息放松中…' : m === 'celebrate' ? '庆祝中！🎉' : '戳一戳我，我会回应你';
+			if (m !== 'celebrate' && m !== 'sleep' && Date.now() < petCelebrateUntil) {
+				return;
+			}
+			const svg = document.getElementById('petSvg');
+			const big = document.getElementById('petBig');
+			if (svg) {
+				if (svg.dataset.mood !== m) {
+					svg.classList.remove('mood-in');
+					void svg.offsetWidth;
+					svg.classList.add('mood-in');
+				}
+				svg.dataset.mood = m;
+			}
+			if (big) big.dataset.mood = m;
+			const zzz = document.getElementById('petZzz');
+			if (zzz) zzz.classList.toggle('on', m === 'sleep');
+			const moodText = m === 'working' ? '正在专注工作…' : m === 'resting' ? '休息放松中…' : m === 'celebrate' ? '庆祝中！🎉' : m === 'sleep' ? 'Zzz… 打盹中' : '戳一戳我，我会回应你';
 			const line = document.getElementById('petMoodLine');
 			if (line) line.textContent = moodText;
+			if (m === 'sleep') clearTimeout(petSleepTimer);
+			else if (m === 'idle') petScheduleSleep();
+			else clearTimeout(petSleepTimer);
 		}
 		function petSay(text, dur) {
 			const b = document.getElementById('petBubble');
@@ -1827,30 +2018,61 @@
 			clearTimeout(petBubbleTimer);
 			petBubbleTimer = setTimeout(() => b.classList.remove('show'), dur || 3200);
 		}
+		function petConfetti() {
+			const box = document.getElementById('petConfetti');
+			if (!box) return;
+			const colors = ['#ff8a5c', '#ffd166', '#7fd4ff', '#8ef0c0', '#ff9ad5', '#b39dff'];
+			for (let i = 0; i < 12; i++) {
+				const s = document.createElement('span');
+				const ang = Math.random() * Math.PI * 2;
+				const dist = 36 + Math.random() * 72;
+				s.style.background = colors[i % colors.length];
+				s.style.setProperty('--fx', (Math.cos(ang) * dist).toFixed(1) + 'px');
+				s.style.setProperty('--fy', (Math.sin(ang) * dist - 26).toFixed(1) + 'px');
+				s.style.setProperty('--fr', (Math.random() * 360 - 180).toFixed(0) + 'deg');
+				s.style.animationDelay = (Math.random() * .25).toFixed(2) + 's';
+				box.appendChild(s);
+				setTimeout(() => s.remove(), 1600);
+			}
+		}
 		function petCelebrate(kind) {
+			petCelebrateUntil = Date.now() + 2600;
 			petSetMood('celebrate');
 			const svg = document.getElementById('petSvg');
 			svg.classList.remove('celebrate');
 			void svg.offsetWidth;
 			svg.classList.add('celebrate');
+			petConfetti();
 			const pool = kind === 'todo' ? PET_LINES.todo : PET_LINES.celebrate;
 			petSay(pool[Math.floor(Math.random() * pool.length)]);
-			setTimeout(() => petSetMood(petMoodNow()), 2600);
+			setTimeout(() => { petCelebrateUntil = 0; petSetMood(petMoodNow()); }, 2600);
 		}
 		function petApplyAll() {
 			petSetMood(petMoodNow());
-			document.getElementById('petWidget').classList.toggle('hidden', !pet.enabled);
+			const widget = document.getElementById('petWidget');
+			widget.classList.toggle('hidden', !pet.enabled);
 			const size = Math.max(50, Math.min(170, pet.size || 92));
 			document.getElementById('petSvg').style.width = size + 'px';
 			document.getElementById('petSvg').style.height = size + 'px';
 			document.getElementById('petNameTag').textContent = pet.name;
 			document.getElementById('petNameBig').textContent = pet.name;
+			if (typeof pet.left === 'number' && typeof pet.top === 'number') {
+				widget.style.left = pet.left + 'px';
+				widget.style.top = pet.top + 'px';
+				widget.style.right = 'auto';
+				widget.style.bottom = 'auto';
+			}
 		}
 		function petPoke() {
+			const svg = document.getElementById('petSvg');
+			if (svg.dataset.mood === 'sleep') {
+				petSetMood(petMoodNow());
+				petSay('啊～醒了！继续干活！');
+				return;
+			}
 			const mood = petMoodNow();
 			const list = mood === 'working' ? PET_LINES.working : mood === 'resting' ? PET_LINES.resting : PET_LINES.idle;
 			petSay(list[Math.floor(Math.random() * list.length)]);
-			const svg = document.getElementById('petSvg');
 			svg.classList.remove('wiggle');
 			void svg.offsetWidth;
 			svg.classList.add('wiggle');
@@ -1861,13 +2083,63 @@
 				const svg = document.getElementById('petSvg');
 				if (svg) {
 					svg.classList.add('blink');
-					setTimeout(() => svg.classList.remove('blink'), 130);
+					setTimeout(() => svg.classList.remove('blink'), 140);
 				}
 				petScheduleBlink();
 			}, 3200 + Math.random() * 1800);
 		}
+		function petScheduleSleep() {
+			clearTimeout(petSleepTimer);
+			petSleepTimer = setTimeout(() => {
+				const svg = document.getElementById('petSvg');
+				if (svg && svg.dataset.mood === 'idle') {
+					petSetMood('sleep');
+					petSay(PET_LINES.sleep[Math.floor(Math.random() * PET_LINES.sleep.length)], 2800);
+				}
+			}, 60000);
+		}
+		function petInitDrag() {
+			const widget = document.getElementById('petWidget');
+			widget.addEventListener('mousedown', (e) => {
+				if (e.target.closest && e.target.closest('.pet-bubble')) return;
+				petDrag = { sx: e.clientX, sy: e.clientY, ox: widget.offsetLeft, oy: widget.offsetTop, moved: false };
+				widget.classList.add('dragging');
+				e.preventDefault();
+			});
+			document.addEventListener('mousemove', (e) => {
+				if (!petDrag) return;
+				const dx = e.clientX - petDrag.sx;
+				const dy = e.clientY - petDrag.sy;
+				if (Math.abs(dx) + Math.abs(dy) > 6) petDrag.moved = true;
+				if (!petDrag.moved) return;
+				const w = widget.offsetWidth;
+				const h = widget.offsetHeight;
+				const left = Math.max(0, Math.min(window.innerWidth - w, petDrag.ox + dx));
+				const top = Math.max(0, Math.min(window.innerHeight - h, petDrag.oy + dy));
+				widget.style.left = left + 'px';
+				widget.style.top = top + 'px';
+				widget.style.right = 'auto';
+				widget.style.bottom = 'auto';
+			});
+			document.addEventListener('mouseup', () => {
+				if (!petDrag) return;
+				const wasDrag = petDrag.moved;
+				petDrag = null;
+				widget.classList.remove('dragging');
+				if (wasDrag) {
+					petSuppressClick = true;
+					pet.left = parseInt(widget.style.left || '0', 10) || 0;
+					pet.top = parseInt(widget.style.top || '0', 10) || 0;
+					savePet();
+					petSay('我搬到这儿啦～');
+				}
+			});
+			widget.addEventListener('click', () => {
+				if (petSuppressClick) { petSuppressClick = false; return; }
+				petPoke();
+			});
+		}
 
-		document.getElementById('petWidget').addEventListener('click', petPoke);
 		document.getElementById('petSave').addEventListener('click', async () => {
 			pet.name = (document.getElementById('petName').value.trim() || '小EE').slice(0, 12);
 			pet.size = Number(document.getElementById('petSize').value) || 92;
@@ -1885,9 +2157,12 @@
 			'☕ 休息时：' + PET_LINES.resting.join(' / ') + '<br>' +
 			'😊 空闲时：' + PET_LINES.idle.join(' / ') + '<br>' +
 			'🎉 完成时：' + PET_LINES.celebrate.join(' / ') + '<br>' +
-			'✅ 待办完成：' + PET_LINES.todo.join(' / ');
+			'✅ 待办完成：' + PET_LINES.todo.join(' / ') + '<br>' +
+			'😴 打盹时：' + PET_LINES.sleep.join(' / ') + '<br>' +
+			'💡 提示：可以按住玩偶拖到工作台任意位置，位置会自动记住';
 
-		/* ================= 启动 ================= */
+		petInitDrag();
+/* ================= 启动 ================= */
 		Promise.all([storage.get('theme'), loadPomo(), loadProjects(), loadTodos(), loadPet()]).then(([theme]) => {
 			applyTheme(theme === 'light' ? 'light' : 'dark');
 			renderIdeaFilters();
