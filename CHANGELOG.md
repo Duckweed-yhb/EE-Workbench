@@ -2,6 +2,14 @@
 
 本文件记录 EE Workbench 的版本变更。
 
+## [1.4.1] - 2026-09-18
+
+### 工程化
+
+- 新增 [CONTRIBUTING.md](CONTRIBUTING.md)，说明开发环境、提交规范与 PR 流程。
+- 新增 GitHub Issue 模板：Bug Report（含 EDA 版本 / 操作系统 / 复现步骤 / 控制台报错）与 Feature Request（场景 / 期望方案 / 备选方案）。
+- README「参与贡献」小节链接到上述文档。
+
 ## [1.4.0] - 2026-09-18
 
 ### 新增 / 形象升级

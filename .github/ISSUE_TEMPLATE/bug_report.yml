@@ -1,0 +1,61 @@
+name: Bug Report
+description: 报告一个插件的 bug 或异常行为
+title: '[Bug]: '
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: 感谢反馈！请尽量把信息填全，这样我能更快定位问题。
+  - type: input
+    id: eda-version
+    attributes:
+      label: 嘉立创 EDA 专业版版本号
+      description: 在「帮助 → 关于」里查看
+      placeholder: 例如 v3.2.12
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: 操作系统
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 复现步骤
+      description: 请一步步描述你做了什么
+      placeholder: |
+        1. 打开 EE Workbench
+        2. 点击「开始」番茄钟
+        3. …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 浏览器控制台报错（F12 → Console）
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 确认
+      options:
+        - label: 我已经搜索过现有 Issue，没有重复报告
+          required: true

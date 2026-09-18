@@ -234,7 +234,7 @@ build/dist/ee-workbench_v1.1.0.eext
 EE Workbench 是一个开源小项目，欢迎你来一起把它做得更好：
 
 - **提 Issue**：遇到 bug、有功能想法、或者觉得哪里不顺手，都欢迎到 [GitHub Issues](https://github.com/Duckweed-yhb/EE-Workbench/issues) 提一个 issue，描述清楚你遇到的场景和期望行为。
-- **提 Pull Request**：欢迎直接贡献代码——修复 bug、新增小工具、改进猫娘桌宠的台词或状态、翻译文档都可以。Fork 本仓库，改完后发 PR，我会尽快 review。
+- **提 Pull Request**：欢迎直接贡献代码——修复 bug、新增小工具、改进猫娘桌宠的台词或状态、翻译文档都可以。Fork 本仓库，改完后发 PR，我会尽快 review。详细开发流程见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 - **反馈插件体验**：在扩展广场使用后，也欢迎留个评价或建议，帮助其他硬件工程师决定是否安装。
 
 无论你是会写代码的工程师，还是只是觉得"这里可以更好用"的用户，你的反馈都有价值。

@@ -3,7 +3,7 @@
 	"uuid": "a1382f928de247fd85d603bca1c30c39",
 	"displayName": "EE Workbench",
 	"description": "一个面向硬件工程师的效率工作台，集成番茄钟、build-your-own-x 项目管理和待办清单。A productivity workbench for hardware engineers - Pomodoro timer, build-your-own-x project tracker, and todo list.",
-	"version": "1.4.0",
+	"version": "1.4.1",
 	"publisher": "Duckweed-yhb",
 	"engines": {
 		"eda": "^3.2.0"
