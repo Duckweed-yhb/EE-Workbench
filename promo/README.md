@@ -10,11 +10,11 @@
   - 小版本（文档 / bugfix）只写进 GitHub Release，不单独宣传
   - 命名规则：`vX.Y.Z.md`，先发的版本号小
 - `shots/` — 宣传用截图：
-  - `pet-cat-moods.png`：猫娘工程师五状态封面图
-  - `tab-pomo.png`：番茄钟主界面
-  - `tab-byox.png`：BYOX 灵感库
-  - `tab-todo.png`：待办清单
-  - `tab-pet.png`：伙伴设置页
+  - `猫娘五状态.png`：猫娘工程师五状态封面图
+  - `番茄钟页.png`：番茄钟主界面
+  - `BYOX灵感库.png`：BYOX 灵感库
+  - `待办页.png`：待办清单
+  - `伙伴设置页.png`：伙伴设置页
 
 ## 其他渠道
 
