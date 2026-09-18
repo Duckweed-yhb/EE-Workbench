@@ -241,4 +241,10 @@ EE Workbench 是一个开源小项目，欢迎你来一起把它做得更好：
 
 ## License
 
-MIT
+代码部分采用 [MIT License](LICENSE)。
+
+### 素材授权
+
+- `images/pet/` 下的猫娘工程师立绘（AI 生成）采用 [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)：可自由分享、二次创作，需署名 **EE Workbench**，**禁止商用**。
+- 其余截图与图标同上。
+- 本插件调用的嘉立创 EDA 扩展 API 归嘉立创所有。
