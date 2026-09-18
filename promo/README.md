@@ -4,7 +4,11 @@
 
 ## 文件说明
 
-- `oshwhub-intro.md` — 立创开源（oshwhub.com）项目介绍，复制正文到项目介绍区，按文中顺序上传 `shots/` 下对应图片即可
+- `oshwhub-intro.md` — 立创开源（oshwhub.com）项目介绍，复制正文到项目介绍区，按文中顺序上传 `shots/` 下对应图片即可；底部标当前版本号
+- `releases/` — 每个版本的发布说明：
+  - 大版本（新功能 / 视觉升级）单独写一篇，挑亮点发 B 站动态 / 小红书 / 扩展广场更新说明
+  - 小版本（文档 / bugfix）只写进 GitHub Release，不单独宣传
+  - 命名规则：`vX.Y.Z.md`，先发的版本号小
 - `shots/` — 宣传用截图：
   - `pet-cat-moods.png`：猫娘工程师五状态封面图
   - `tab-pomo.png`：番茄钟主界面
