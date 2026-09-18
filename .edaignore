@@ -5,6 +5,7 @@
 /config/
 /coverage/
 /docs/
+/promo/
 /node_modules/
 /src/
 /.editorconfig
