@@ -1,7 +1,7 @@
 {
 	"name": "ee-workbench",
 	"type": "module",
-	"version": "1.4.2",
+	"version": "1.5.0",
 	"description": "EE Workbench - 面向硬件工程师的效率工作台（番茄钟 / build-your-own-x / 待办清单）",
 	"author": "EE Workbench",
 	"license": "MIT",

@@ -530,6 +530,9 @@
 		<div class="logo">EE</div>
 		<div class="title">EE Workbench</div>
 		<span class="badge" id="envBadge">EDA</span>
+		<button class="icon-btn" id="exportBtn" title="导出数据（JSON 备份）">⬇</button>
+		<button class="icon-btn" id="importBtn" title="导入数据（恢复备份）">⬆</button>
+		<input type="file" id="importFile" accept=".json,application/json" style="display:none">
 		<button class="icon-btn" id="themeBtn" title="切换主题">🌙</button>
 		<button class="icon-btn" id="closeBtn" title="关闭">✕</button>
 	</div>
@@ -672,6 +675,7 @@
 		<div id="todoList"></div>
 		<div class="todo-footer">
 			<span id="todoStatsText">0 项未完成</span>
+			<button class="btn small" id="todoCSV">导出 CSV</button>
 			<button class="btn small" id="todoClearDone">清空已完成</button>
 		</div>
 	</section>
@@ -964,6 +968,84 @@
 				try { eda.sys_IFrame.closeIFrame('ee-workbench'); } catch { /* noop */ }
 			}
 		});
+
+		/* ================= 数据备份与恢复 ================= */
+		const BACKUP_KEYS = ['theme', 'pomodoro', 'projects', 'todos', 'pet'];
+
+		function downloadFile(content, filename, mime) {
+			const blob = new Blob([content], { type: mime });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = filename;
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+			setTimeout(() => URL.revokeObjectURL(url), 2000);
+		}
+
+		function backupDateName() {
+			const d = new Date(), p = n => String(n).padStart(2, '0');
+			return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes());
+		}
+
+		async function exportBackup() {
+			const data = {};
+			for (const k of BACKUP_KEYS) data[k] = await storage.get(k);
+			const payload = { app: 'EE Workbench', formatVersion: 1, exportedAt: new Date().toISOString(), data };
+			downloadFile(JSON.stringify(payload, null, 2), 'ee-workbench-backup-' + backupDateName() + '.json', 'application/json');
+			toast('备份文件已导出');
+		}
+
+		async function importBackup(file) {
+			let payload;
+			try { payload = JSON.parse(await file.text()); }
+			catch { toast('文件无法解析，不是有效的备份', 'error'); return; }
+			if (!payload || payload.app !== 'EE Workbench' || !payload.data) {
+				toast('这不是 EE Workbench 的备份文件', 'error');
+				return;
+			}
+			confirmDialog('导入将覆盖当前全部数据，确定继续？', async () => {
+				for (const k of BACKUP_KEYS) {
+					if (payload.data[k] !== undefined && payload.data[k] !== null) await storage.set(k, payload.data[k]);
+				}
+				toast('数据已导入，正在刷新…');
+				setTimeout(() => location.reload(), 800);
+			});
+		}
+
+		function csvEscape(v) {
+			const s = v == null ? '' : String(v);
+			return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+		}
+
+		function exportTodosCSV() {
+			const PRI = { high: '高', medium: '中', low: '低' };
+			const rows = [['任务', '状态', '优先级', '分类', '关联项目', '创建时间', '完成时间']];
+			todos.forEach(x => {
+				rows.push([
+					x.text,
+					x.done ? '已完成' : '未完成',
+					PRI[x.priority] || x.priority,
+					x.category || '',
+					x.project || '',
+					x.createdAt ? new Date(x.createdAt).toLocaleString() : '',
+					x.completedAt ? new Date(x.completedAt).toLocaleString() : ''
+				]);
+			});
+			const csv = '\ufeff' + rows.map(r => r.map(csvEscape).join(',')).join('\r\n');
+			downloadFile(csv, 'ee-workbench-todos-' + backupDateName() + '.csv', 'text/csv');
+			toast('待办清单 CSV 已导出');
+		}
+
+		document.getElementById('exportBtn').addEventListener('click', exportBackup);
+		document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+		document.getElementById('importFile').addEventListener('change', e => {
+			const f = e.target.files && e.target.files[0];
+			if (f) importBackup(f);
+			e.target.value = '';
+		});
+		document.getElementById('todoCSV').addEventListener('click', exportTodosCSV);
 
 		/* ================= 番茄钟 ================= */
 		const MODE = { FOCUS: 'focus', SHORT_BREAK: 'shortBreak', LONG_BREAK: 'longBreak' };
