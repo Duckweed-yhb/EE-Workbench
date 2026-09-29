@@ -51,7 +51,8 @@ export function loadTodos() {
 		if (Array.isArray(raw)) {
 			return raw.filter(t => t && typeof t === 'object' && t.text);
 		}
-	} catch {
+	}
+	catch {
 		// 存储不可用时返回空列表
 	}
 	return [];
@@ -62,7 +63,8 @@ export async function saveTodos(todos) {
 	try {
 		await eda.sys_Storage.setExtensionUserConfig(STORAGE_KEY, todos);
 		return true;
-	} catch {
+	}
+	catch {
 		return false;
 	}
 }

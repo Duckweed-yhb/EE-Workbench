@@ -112,7 +112,8 @@ export function loadState() {
 				settings: { ...DEFAULT_SETTINGS, ...raw.settings },
 			};
 		}
-	} catch {
+	}
+	catch {
 		// 独立脚本环境或存储不可用时回退默认状态
 	}
 	return createState();
@@ -124,7 +125,8 @@ export async function saveState(state) {
 	try {
 		await eda.sys_Storage.setExtensionUserConfig(STORAGE_KEY, payload);
 		return true;
-	} catch {
+	}
+	catch {
 		return false;
 	}
 }

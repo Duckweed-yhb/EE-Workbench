@@ -67,7 +67,8 @@ export function loadProjects() {
 		if (Array.isArray(raw)) {
 			return raw.filter(p => p && typeof p === 'object' && p.name);
 		}
-	} catch {
+	}
+	catch {
 		// 存储不可用时返回空列表
 	}
 	return [];
@@ -78,7 +79,8 @@ export async function saveProjects(projects) {
 	try {
 		await eda.sys_Storage.setExtensionUserConfig(STORAGE_KEY, projects);
 		return true;
-	} catch {
+	}
+	catch {
 		return false;
 	}
 }

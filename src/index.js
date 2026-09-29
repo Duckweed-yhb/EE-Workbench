@@ -9,9 +9,9 @@
  */
 import extensionConfig from '../extension.json' with { type: 'json' };
 
-import { addTodoItem, createTodo, todoStats } from './todo.js';
+import { loadProjects, projectStats } from './build-your-own-x.js';
 import { loadState as loadPomodoroState } from './pomodoro.js';
-import { projectStats, loadProjects } from './build-your-own-x.js';
+import { addTodoItem, createTodo, todoStats } from './todo.js';
 
 /** 工作台窗口 ID（与 iframe/workbench.html 中的关闭调用保持一致） */
 export const WORKBENCH_IFRAME_ID = 'ee-workbench';

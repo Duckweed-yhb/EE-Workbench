@@ -854,7 +854,7 @@
 			async get(key) {
 				if (hasEda) {
 					try {
-						const v = eda.sys_Storage.getExtensionUserConfig(key);
+						const v = eda.sys_Storage.getExtensionUserConfig('eeWorkbench.' + key);
 						if (v !== undefined && v !== null) return v;
 					} catch { /* fall through */ }
 				}
@@ -868,7 +868,7 @@
 			async set(key, value) {
 				if (hasEda) {
 					try {
-						await eda.sys_Storage.setExtensionUserConfig(key, value);
+						await eda.sys_Storage.setExtensionUserConfig('eeWorkbench.' + key, value);
 						return true;
 					} catch { /* fall through */ }
 				}
@@ -880,6 +880,23 @@
 				}
 			},
 		};
+
+		/** 一次性迁移：老版本在 EDA 存储中使用裸 key（如 'todos'），统一迁移到带前缀 key */
+		async function migrateLegacyKeys() {
+			if (!hasEda) return;
+			for (const key of ['theme', 'pomodoro', 'projects', 'todos', 'pet']) {
+				try {
+					const full = 'eeWorkbench.' + key;
+					const cur = eda.sys_Storage.getExtensionUserConfig(full);
+					if (cur === undefined || cur === null) {
+						const legacy = eda.sys_Storage.getExtensionUserConfig(key);
+						if (legacy !== undefined && legacy !== null) {
+							await eda.sys_Storage.setExtensionUserConfig(full, legacy);
+						}
+					}
+				} catch { /* 迁移失败不阻塞启动 */ }
+			}
+		}
 
 		function toast(msg, type, timer) {
 			try {
@@ -2213,7 +2230,7 @@
 
 		petInitDrag();
 /* ================= 启动 ================= */
-		Promise.all([storage.get('theme'), loadPomo(), loadProjects(), loadTodos(), loadPet()]).then(([theme]) => {
+		migrateLegacyKeys().finally(() => Promise.all([storage.get('theme'), loadPomo(), loadProjects(), loadTodos(), loadPet()])).then(([theme]) => {
 			applyTheme(theme === 'light' ? 'light' : 'dark');
 			renderIdeaFilters();
 			renderIdeaList();

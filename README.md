@@ -15,7 +15,7 @@ EE Workbench 是一个面向硬件工程师、PCB 设计者、嵌入式开发者
 
 ## 功能演示
 
-> 截图来自 v1.1.0 工作台（预览模式）。
+> 截图来自最新版本工作台（预览模式）。
 
 ### 番茄钟（支持深色 / 浅色主题）
 
@@ -179,6 +179,17 @@ ee-workbench/
 └─ LICENSE
 ```
 
+## 架构与数据流
+
+插件分为两部分：
+
+- **宿主端（`src/`）**：扩展入口与菜单命令，运行在扩展环境中，直接调用嘉立创 EDA API（原理图 / PCB 图元统计、存储、对话框等）。
+- **界面端（`iframe/workbench.html`）**：自包含的工作台界面（HTML + CSS + JS），通过 `SYS_IFrame` 加载，运行在 iframe 沙箱内。
+
+**数据共享**：两端通过 `eda.sys_Storage` 读写同一份数据，存储键统一为 `eeWorkbench.<模块>`（模块：theme / pomodoro / projects / todos / pet），与具体工程无关，跨工程共用。
+
+**降级策略**：浏览器预览或存储不可用时，界面端自动降级到浏览器 `localStorage`（键名相同）；老版本存放在裸键（如 `todos`）下的数据会在首次启动时自动迁移。
+
 ## 开发说明
 
 本插件基于嘉立创 EDA 专业版扩展开发框架（pro-api-sdk）开发，入口为 `src/index.js`，通过 JavaScript 调用扩展 API 实现交互逻辑。
@@ -201,12 +212,12 @@ npm run build
 构建产物（`.eext`）生成在 `build/dist/` 目录：
 
 ```
-build/dist/ee-workbench_v1.1.0.eext
+build/dist/ee-workbench_v1.5.0.eext
 ```
 
 ### 本地调试
 
-在嘉立创 EDA 专业版中打开扩展管理器，导入 `build/dist/ee-workbench_v1.1.0.eext`（或直接导入本工程目录），然后通过顶部菜单「EE Workbench」打开工作台。
+在嘉立创 EDA 专业版中打开扩展管理器，导入 `build/dist/ee-workbench_v1.5.0.eext`（或直接导入本工程目录），然后通过顶部菜单「EE Workbench」打开工作台。
 
 ## 安装方式
 
